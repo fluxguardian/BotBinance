@@ -16,6 +16,8 @@ namespace BotBinance
             client.AddStrategy(new Scalp("LINKUSDT", TimeInterval.Minutes_3, "flaxmine"));
             client.StartStrategies();
 
+            Console.ReadKey();
+
             //Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
 
             //clientKirill.AddStrategy(new ScalpMA("LINKUSDT", TimeInterval.Minutes_3, "Kirill"));
