@@ -132,24 +132,28 @@ namespace Strategy
         {
             for (ushort i = 0; i < ushort.MaxValue; i++)
             {
-                IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, _sma.LongPeriod + 3);
-                IEnumerable<decimal> prices = candles.Select(x => x.Close);
-
-                bool buySignalSma = _sma.BuySignalCross(prices);
-                //bool buySignalTSI = _tsi.BuySignal(prices);
-
-                if (buySignalSma) //&& buySignalTSI)
+                try
                 {
-                    List<Balance> balance = await _stock.GetBalance(_asset);
-                    await _stock.TakeMarketOrder(new Signal()
+                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, _sma.LongPeriod + 3);
+                    IEnumerable<decimal> prices = candles.Select(x => x.Close);
+
+                    bool buySignalSma = _sma.BuySignalCross(prices);
+                    //bool buySignalTSI = _tsi.BuySignal(prices);
+
+                    if (buySignalSma) //&& buySignalTSI)
                     {
-                        Symbol = _symbol,
-                        Side = OrderSide.BUY,
-                        Quantity = _normalization.NormalizeBuy(balance.First().Free)
-                    });
-                    break;
+                        List<Balance> balance = await _stock.GetBalance(_asset);
+                        await _stock.TakeMarketOrder(new Signal()
+                        {
+                            Symbol = _symbol,
+                            Side = OrderSide.BUY,
+                            Quantity = _normalization.NormalizeBuy(balance.First().Free)
+                        });
+                        break;
+                    }
+                    await Task.Delay((60 - DateTime.Now.Second + 2) * 1000);
                 }
-                await Task.Delay((60 - DateTime.Now.Second + 2) * 1000);
+                catch (Exception e) { Console.WriteLine(e.Message); continue; }
             }
         }
     }
