@@ -17,11 +17,6 @@ namespace BotBinance
             client.StartStrategies();
 
             Console.ReadKey();
-
-            //Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
-
-            //clientKirill.AddStrategy(new ScalpMA("LINKUSDT", TimeInterval.Minutes_3, "Kirill"));
-            //clientKirill.StartStrategies();
         }
     }
 }
