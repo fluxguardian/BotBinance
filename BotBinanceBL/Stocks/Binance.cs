@@ -129,6 +129,8 @@ namespace BotBinanceBL.Stocks
     
         public async Task TrailingOCO(Signal signal, TimeInterval timeInterval)
         {
+            Console.WriteLine("TrailingOCO");
+
             OCOOrder orderOco = await PostOrderOCOAsync(signal);
 
             await Task.Delay(1500);
