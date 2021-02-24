@@ -126,22 +126,25 @@ namespace BotBinanceBL.Stocks
 
             return candle.Last().Close;
         }
+    
         public async Task TrailingOCO(Signal signal, TimeInterval timeInterval)
         {
             OCOOrder orderOco = await PostOrderOCOAsync(signal);
+
+            await Task.Delay(1500);
 
             for (ushort i = 0; i < ushort.MaxValue; i++)
             {
                 try
                 {
-                    IEnumerable<Candlestick> candlestick = await GetCandlestickAsync(signal.Symbol, timeInterval, 1);
+                    QueryOCO runningOrder = await GetOcoOrderAsync(orderOco);
 
-                    if (signal.Price - candlestick.First().Close <= 0.2m)
+                    if (!runningOrder.ListOrderStatus.Equals("ALL_DONE"))
                     {
-                        QueryOCO runningOrder = await GetOcoOrderAsync(orderOco);
+                        IEnumerable<Candlestick> candlestick = await GetCandlestickAsync(signal.Symbol, timeInterval, 1);
 
-                        if (!runningOrder.ListOrderStatus.Equals("ALL_DONE"))
-                        {
+                        if (signal.Price - candlestick.First().Close <= 2.0m)
+                        {                        
                             QueryOCO canceledOrder = await _binanceRequest.CancelOCO(signal.Symbol, orderOco.ListClientOrderId);
 
                             await Task.Delay(2000);
@@ -150,7 +153,6 @@ namespace BotBinanceBL.Stocks
 
                             orderOco = await PostOrderOCOAsync(signal);
                         }
-                        else { break; }
                     }
                     await Task.Delay(1000);
                 }
