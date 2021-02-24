@@ -143,7 +143,7 @@ namespace BotBinanceBL.Stocks
                     {
                         IEnumerable<Candlestick> candlestick = await GetCandlestickAsync(signal.Symbol, timeInterval, 1);
 
-                        if (signal.Price - candlestick.First().Close <= 2.0m)
+                        if (signal.Price - candlestick.First().Close <= 0.2m)
                         {                        
                             QueryOCO canceledOrder = await _binanceRequest.CancelOCO(signal.Symbol, orderOco.ListClientOrderId);
 
