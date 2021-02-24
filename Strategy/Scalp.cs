@@ -94,7 +94,7 @@ namespace Strategy
                         Quantity = _normalization.NormalizeSell(balance.Last().Free),
                         Price = Math.Round(currentPrice + 1.0m, _normalization.Round.RoundPrice),
                         StopLoss = Math.Round(currentPrice - 0.6m, _normalization.Round.RoundPrice),
-                        StopLimitPrice = Math.Round(currentPrice - 0.5m, _normalization.Round.RoundPrice)
+                        StopLimitPrice = Math.Round(currentPrice - 0.65m, _normalization.Round.RoundPrice)
                     }, _timeInterval);
                     break;
                 }
