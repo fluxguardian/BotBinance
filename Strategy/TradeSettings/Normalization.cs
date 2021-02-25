@@ -1,5 +1,6 @@
 ﻿using Model.TradingRules;
 using System;
+using System.Globalization;
 using System.Linq;
 
 namespace Strategy.TradeSettings
@@ -30,10 +31,11 @@ namespace Strategy.TradeSettings
             var result = asset.Filters;
 
             var roundQuantity = result
-                .Select(x => x.MinQty).ToList()[2].ToString()
-                .Split(',').Last().IndexOf('1') + 1;
+                .Select(x => x.MinQty).ToList()[2].ToString(CultureInfo.InvariantCulture)
+                .Split('.').Last().IndexOf('1') + 1;
 
-            var roundPrice = result.First().MinPrice.ToString().Split(',').Last().IndexOf('1') + 1;
+            var roundPrice = result.First().MinPrice.ToString(CultureInfo.InvariantCulture)
+                .Split('.').Last().IndexOf('1') + 1;
 
             return new Round()
             {
