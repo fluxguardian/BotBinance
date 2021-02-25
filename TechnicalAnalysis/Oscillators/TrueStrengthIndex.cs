@@ -59,7 +59,7 @@ namespace TechnicalAnalysis.Oscillators
             var pricesClose = prices.ToList();
 
             TSIValues tsi = GetTSI(pricesClose, _quantityCandles, _periodTSI, _periodSignalLine);
-            if(tsi.TSI.Last() > 0 && tsi.SignalLine.Last() > 0)
+            if(tsi.TSI.Last() > 20.0m && tsi.SignalLine.Last() > 10.0m)
             {
                 return true;
             }
