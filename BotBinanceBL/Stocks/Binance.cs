@@ -133,9 +133,9 @@ namespace BotBinanceBL.Stocks
 
             OCOOrder orderOco = await PostOrderOCOAsync(signal);
 
-            await Task.Delay(1500);
+            await Task.Delay(2500);
 
-            for (ushort i = 0; i < ushort.MaxValue; i++)
+            for (uint i = 0; i < uint.MaxValue; i++)
             {
                 try
                 {
@@ -156,7 +156,8 @@ namespace BotBinanceBL.Stocks
                             orderOco = await PostOrderOCOAsync(signal);
                         }
                     }
-                    await Task.Delay(1000);
+                    else { break; }
+                    await Task.Delay(2000);
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); continue; }
             }
