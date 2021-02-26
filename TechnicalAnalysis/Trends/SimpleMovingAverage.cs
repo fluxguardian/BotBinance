@@ -60,8 +60,8 @@ namespace Trends.TechnicalAnalysis
 
         public bool BuySignal(IEnumerable<decimal> prices)
         {
-            decimal shortAverage = GetSimpleMovingAverage(prices.ToList(), ShortPeriod);
-            decimal longAverage = GetSimpleMovingAverage(prices.ToList(), LongPeriod);
+            decimal shortAverage = GetSimpleMovingAverages(prices.ToList(), ShortPeriod).SkipLast(1).Last();
+            decimal longAverage = GetSimpleMovingAverages(prices.ToList(), LongPeriod).SkipLast(1).Last();
 
             if(shortAverage > longAverage)
             {
