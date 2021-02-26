@@ -55,7 +55,7 @@ namespace Strategy
 
             Console.WriteLine($"Баланс пользователя {_name}: {Math.Round(balance.First().Free, _normalization.Round.RoundPrice)} $");
 
-            for (ushort i = 0; i < ushort.MaxValue; i++)
+            for (uint i = 0; i < uint.MaxValue; i++)
             {
                 try
                 {
@@ -83,7 +83,6 @@ namespace Strategy
 
                         #endregion
 
-                        // ожидаем пересечение скользящих (сверху-вниз), чтобы след покупка была только после пересечении (снизу-верх)
                         await WaitCross();
                     }
 
@@ -97,7 +96,7 @@ namespace Strategy
         {
             Console.WriteLine("Ожидаем пересечение скользящих (сверху-вниз), чтобы след покупка была только после пересечении (снизу-верх)");
 
-            for (int i = 0; i < ushort.MaxValue; i++)
+            for (uint i = 0; i < uint.MaxValue; i++)
             {
                 IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, _sma.LongPeriod + 3);
 
@@ -110,14 +109,13 @@ namespace Strategy
                 await Task.Delay((60 - DateTime.Now.Second + 2) * 1000);
             }
         }
-
         private async Task Sell(decimal profitPercent, decimal stopLoss)
         {
             decimal lastBuyPrice = await _stock.GetLastBuyPriceAsync(_symbol);
 
             List<Balance> balance = await _stock.GetBalance(_asset);
 
-            for (ushort i = 0; i < ushort.MaxValue; i++)
+            for (uint i = 0; i < uint.MaxValue; i++)
             {
                 decimal currentPrice = await _stock.GetCurrentPrice(_symbol, _timeInterval);
 
@@ -165,7 +163,7 @@ namespace Strategy
         }
         private async Task Buy()
         {
-            for (ushort i = 0; i < ushort.MaxValue; i++)
+            for (uint i = 0; i < uint.MaxValue; i++)
             {
                 try
                 {
