@@ -34,7 +34,7 @@ namespace Strategy
             _timeInterval = timeInterval;
             _name = name;
 
-            _sma = new SimpleMovingAverage(shortPeriod: 90, longPeriod: 400);
+            _sma = new SimpleMovingAverage(shortPeriod: 90, longPeriod: 250);
             _tsi = new TrueStrengthIndex(25, 13, 13);
             _averageTrueRange = new AverageTrueRange(period: 14);
         }
@@ -71,7 +71,7 @@ namespace Strategy
                     {
                         Console.WriteLine("Ожидаем выход из рынка");
 
-                        await Sell(profitPercent: 1.03m, stopLoss: 1.02m);
+                        await Sell(profitPercent: 1.035m, stopLoss: 1.02m);
 
                         await Task.Delay(2500);
 
@@ -121,15 +121,23 @@ namespace Strategy
 
                 if (currentPrice >= lastBuyPrice * profitPercent)
                 {
-                    await _stock.TrailingOCO(new Signal()
+                    //await _stock.TrailingOCO(new Signal()
+                    //{
+                    //    Symbol = _symbol,
+                    //    Side = OrderSide.SELL,
+                    //    Quantity = _normalization.NormalizeSell(balance.Last().Free),
+                    //    Price = Math.Round(currentPrice + 1.2m, _normalization.Round.RoundPrice),
+                    //    StopLoss = Math.Round(currentPrice - 0.6m, _normalization.Round.RoundPrice),
+                    //    StopLimitPrice = Math.Round(currentPrice - 0.65m, _normalization.Round.RoundPrice)
+                    //}, _timeInterval);
+
+                    await _stock.TakeMarketOrder(new Signal()
                     {
                         Symbol = _symbol,
                         Side = OrderSide.SELL,
-                        Quantity = _normalization.NormalizeSell(balance.Last().Free),
-                        Price = Math.Round(currentPrice + 1.2m, _normalization.Round.RoundPrice),
-                        StopLoss = Math.Round(currentPrice - 0.6m, _normalization.Round.RoundPrice),
-                        StopLimitPrice = Math.Round(currentPrice - 0.65m, _normalization.Round.RoundPrice)
-                    }, _timeInterval);
+                        Quantity = _normalization.NormalizeSell(balance.Last().Free)
+                    });
+
                     break;
                 }
                 else if (currentPrice <= lastBuyPrice / stopLoss)
