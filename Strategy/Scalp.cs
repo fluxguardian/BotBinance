@@ -129,64 +129,18 @@ namespace Strategy
 
             for (uint i = 0; i < uint.MaxValue; i++)
             {
-                QueryOCO runningOrder = await _stock.GetOcoOrderAsync(orderOco);
-
-                if (runningOrder.ListOrderStatus.Equals("ALL_DONE"))
+                try
                 {
-                    break;
+                    QueryOCO runningOrder = await _stock.GetOcoOrderAsync(orderOco);
+
+                    if (runningOrder.ListOrderStatus.Equals("ALL_DONE"))
+                    {
+                        break;
+                    }
+                    await Task.Delay(10000);
                 }
-                await Task.Delay(10000);
+                catch (Exception e) { Console.WriteLine(e.Message); continue; }
             }
-
-                //if (currentPrice >= lastBuyPrice * profitPercent)
-                //{
-                //    //await _stock.TrailingOCO(new Signal()
-                //    //{
-                //    //    Symbol = _symbol,
-                //    //    Side = OrderSide.SELL,
-                //    //    Quantity = _normalization.NormalizeSell(balance.Last().Free),
-                //    //    Price = Math.Round(currentPrice + 1.2m, _normalization.Round.RoundPrice),
-                //    //    StopLoss = Math.Round(currentPrice - 0.6m, _normalization.Round.RoundPrice),
-                //    //    StopLimitPrice = Math.Round(currentPrice - 0.65m, _normalization.Round.RoundPrice)
-                //    //}, _timeInterval);
-
-                //    await _stock.TakeMarketOrder(new Signal()
-                //    {
-                //        Symbol = _symbol,
-                //        Side = OrderSide.SELL,
-                //        Quantity = _normalization.NormalizeSell(balance.Last().Free)
-                //    });
-
-                //    break;
-                //}
-                //else if (currentPrice <= lastBuyPrice / stopLoss)
-                //{
-                //    await _stock.TakeMarketOrder(new Signal()
-                //    {
-                //        Symbol = _symbol,
-                //        Side = OrderSide.SELL,
-                //        Quantity = _normalization.NormalizeSell(balance.Last().Free)
-                //    });
-                //    break;
-                //}
-                //else
-                //{
-                //    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, _sma.LongPeriod + 3);
-
-                //    bool sellSignalCross = _sma.SellSignalCross(candles.Select(x => x.Close));
-                //    if (sellSignalCross)
-                //    {
-                //        await _stock.TakeMarketOrder(new Signal()
-                //        {
-                //            Symbol = _symbol,
-                //            Side = OrderSide.SELL,
-                //            Quantity = _normalization.NormalizeSell(balance.Last().Free)
-                //        });
-                //        break;
-                //    }
-                //}
-                
-            //}
         }
         private async Task Buy()
         {
