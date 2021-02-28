@@ -34,7 +34,7 @@ namespace Strategy
             _timeInterval = timeInterval;
             _name = name;
 
-            _sma = new SimpleMovingAverage(shortPeriod: 90, longPeriod: 250);
+            _sma = new SimpleMovingAverage(shortPeriod: 90, longPeriod: 200);
             _tsi = new TrueStrengthIndex(25, 13, 13);
             _averageTrueRange = new AverageTrueRange(period: 14);
         }
