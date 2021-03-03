@@ -30,5 +30,16 @@
         public static readonly string TradeList = "/api/v3/myTrades";
         public static readonly string DepositHistory = "/wapi/v1/getDepositHistory.html";
         #endregion
+
+        #region Margin Account/Trade
+
+        public static readonly string Transfer = "/sapi/v1/margin/transfer";
+        public static readonly string Borrow = "/sapi/v1/margin/loan";
+        public static readonly string Repay = "/sapi/v1/margin/repay";
+        public static readonly string MaxBorrow = "/sapi/v1/margin/maxBorrowable";
+        public static readonly string NewOrderMargin = "/sapi/v1/margin/order";
+        public static readonly string MaxTransferOutAmount = "/sapi/v1/margin/maxTransferable";
+
+        #endregion
     }
 }
