@@ -14,7 +14,7 @@ namespace BotBinanceBL.Stocks
 {
     public class Binance : IStock
     {
-        private string _url { get; set; } = "https://www.binance.com";
+        private string _url { get; set; } = "https://api.binance.com";
         private string _key { get; set; }
         private string _secretKey { get; set; }
 
@@ -27,6 +27,61 @@ namespace BotBinanceBL.Stocks
 
             _binanceRequest = new BinanceRequest(new HttpUtilities(_url, key, secretKey));
         }
+
+        #region Margin methods
+
+        public async Task<AccountTransfer> TransferAsync(string asset, decimal amount, TransferType transferType)
+        {
+            try
+            {
+                return await _binanceRequest.Transfer(asset, amount, transferType);
+            }
+            catch { throw new Exception($"Ошибка в методе TransferAsync ({DateTime.Now})"); }
+        }
+        public async Task<AccountBorrow> BorrowAsync(string asset, decimal amount, string isIsolated = "FALSE")
+        {
+            try
+            {
+                return await _binanceRequest.Borrow(asset, amount, isIsolated);
+            }
+            catch { throw new Exception($"Ошибка в методе BorrowAsync ({DateTime.Now})"); }
+        }
+        public async Task<AccountRepay> RepayAsync(string asset, decimal amount, string isIsolated = "FALSE")
+        {
+            try
+            {
+                return await _binanceRequest.Repay(asset, amount, isIsolated);
+            }
+            catch { throw new Exception($"Ошибка в методе RepayAsync ({DateTime.Now})"); }
+        }
+        public async Task<MaxBorrow> MaxBorrowAsync(string asset)
+        {
+            try
+            {
+                return await _binanceRequest.MaxBorrow(asset);
+            }
+            catch { throw new Exception($"Ошибка в методе MaxBorrowAsync ({DateTime.Now})"); }
+        }
+        public async Task<NewOrderMargin> MarketOrderMarginAsync(string symbol, decimal baseAssetQuantity, OrderSide side, string isIsolated = "FALSE")
+        {
+            try
+            {
+                return await _binanceRequest.MarketOrderQuantityMargin(symbol, baseAssetQuantity, side);
+            }
+            catch { throw new Exception($"Ошибка в методе MarketOrderMarginAsync {DateTime.Now}"); }
+        }
+        public async Task<MaxTransferOutAmount> MaxTransferOutAmountAsync(string asset, string isIsolated = "FALSE")
+        {
+            try
+            {
+                return await _binanceRequest.MaxTransferOutAmount(asset, isIsolated);
+            }
+            catch { throw new Exception($"Ошибка в методе MaxTransferOutAmountAsync {DateTime.Now}"); }
+        }
+
+        #endregion
+
+        #region Spot methods
 
         public async Task<AccountInfo> GetAccountInformation()
         {
@@ -126,7 +181,6 @@ namespace BotBinanceBL.Stocks
 
             return candle.Last().Close;
         }
-    
         public async Task TrailingOCO(Signal signal, TimeInterval timeInterval)
         {
             Console.WriteLine("TrailingOCO");
@@ -163,11 +217,15 @@ namespace BotBinanceBL.Stocks
             }
         }
 
+        #endregion
+
         private void ReformSignal(Signal signal)
         {
             signal.Price += 0.2m;
             signal.StopLoss += 0.2m;
             signal.StopLimitPrice += 0.2m;
-        }    
+        }
+
+        
     }
 }
