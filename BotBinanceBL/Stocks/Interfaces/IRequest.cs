@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace BotBinanceBL.Stocks.Interfaces
 {
-    public interface IRequest : IOrder, ICandle, IAccount
+    public interface IRequest : IOrder, ICandle, IAccount, IMargin
     {
         Task<T> CallAsync<T>(ApiMethod method, string endpoint, bool isSigned = false, string parameters = null);
         Task<TradingRules> GetExchangeInformationAsync();
