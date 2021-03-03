@@ -22,5 +22,11 @@ namespace BotBinanceBL.Stocks.Interfaces
         Task<IEnumerable<Candlestick>> GetCandlestickAsync(string symbol, TimeInterval timeInterval, int quantity = 50);
         Task<decimal> GetLastBuyPriceAsync(string symbol);
         Task<decimal> GetCurrentPrice(string symbol, TimeInterval timeInterval);
-     }
+        Task<AccountTransfer> TransferAsync(string asset, decimal amount, TransferType transferType);
+        Task<AccountBorrow> BorrowAsync(string asset, decimal amount, string isIsolated = "FALSE");
+        Task<AccountRepay> RepayAsync(string asset, decimal amount, string isIsolated = "FALSE");
+        Task<MaxBorrow> MaxBorrowAsync(string asset);
+        Task<NewOrderMargin> MarketOrderMarginAsync(string symbol, decimal quantity, OrderSide side, string isIsolated = "FALSE");
+        Task<MaxTransferOutAmount> MaxTransferOutAmountAsync(string asset, string isIsolated = "FALSE");
+    }
 }
