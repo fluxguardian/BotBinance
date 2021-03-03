@@ -7,6 +7,7 @@ using Model.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -43,7 +44,86 @@ namespace BotBinanceBL.Requests
             }
 
             throw new Exception("Error...");
-        } 
+        }
+
+        #region Margin
+
+        public async Task<AccountTransfer> Transfer(string asset, decimal amount, TransferType transferType)
+        {
+            if (string.IsNullOrWhiteSpace(asset))
+            {
+                throw new ArgumentException("asset cannot be emtpy");
+            }
+
+            string args = $"asset={asset}&amount={amount.ToString(CultureInfo.InvariantCulture)}&type={transferType.GetDescription()}&recvWindow=5000";
+
+            return await CallAsync<AccountTransfer>(ApiMethod.POST, EndPoints.Transfer, true, args);
+        }
+        public async Task<AccountBorrow> Borrow(string asset, decimal amount, string isIsolated = "FALSE")
+        {
+            if (string.IsNullOrWhiteSpace(asset))
+            {
+                throw new ArgumentException("asset cannot be emtpy");
+            }
+
+            string args = $"asset={asset}&amount={amount.ToString(CultureInfo.InvariantCulture)}&isIsolated={isIsolated}&recvWindow=5000";
+
+            return await CallAsync<AccountBorrow>(ApiMethod.POST, EndPoints.Borrow, true, args);
+        }
+        public async Task<AccountRepay> Repay(string asset, decimal amount, string isIsolated = "FALSE")
+        {
+            if (string.IsNullOrWhiteSpace(asset))
+            {
+                throw new ArgumentException("asset cannot be emtpy");
+            }
+
+            string args = $"asset={asset}&amount={amount.ToString(CultureInfo.InvariantCulture)}&isIsolated={isIsolated}&recvWindow=5000";
+
+            return await CallAsync<AccountRepay>(ApiMethod.POST, EndPoints.Repay, true, args);
+        }
+        public async Task<MaxBorrow> MaxBorrow(string asset)
+        {
+            if (string.IsNullOrWhiteSpace(asset))
+            {
+                throw new ArgumentException("asset cannot be emtpy");
+            }
+
+            string args = $"asset={asset}&recvWindow=5000";
+
+            return await CallAsync<MaxBorrow>(ApiMethod.GET, EndPoints.MaxBorrow, true, args);
+        }
+        public async Task<NewOrderMargin> MarketOrderQuantityMargin(string symbol, decimal quantity, OrderSide side, string isIsolated = "FALSE")
+        {
+            var args = $"symbol={symbol}&quantity={quantity.ToString(CultureInfo.InvariantCulture)}" +
+                $"&type={OrderType.MARKET}&side={side}" +
+                $"&recvWindow=10000" +
+                $"&isIsolated={isIsolated}";
+
+            return await CallAsync<NewOrderMargin>(ApiMethod.POST, EndPoints.NewOrderMargin, true, args);
+        }
+        public async Task<NewOrderMargin> MarketOrderQuoteMargin(string symbol, decimal quoteOrderQty, OrderSide side, string isIsolated = "FALSE")
+        {
+            var args = $"symbol={symbol}&quoteOrderQty={quoteOrderQty.ToString(CultureInfo.InvariantCulture)}" +
+                $"&type={OrderType.MARKET}&side={side}" +
+                $"&recvWindow=10000" +
+                $"&isIsolated={isIsolated}";
+
+            return await CallAsync<NewOrderMargin>(ApiMethod.POST, EndPoints.NewOrderMargin, true, args);
+        }
+        public async Task<MaxTransferOutAmount> MaxTransferOutAmount(string asset, string isIsolated = "FALSE")
+        {
+            if (string.IsNullOrWhiteSpace(asset))
+            {
+                throw new ArgumentException("asset cannot be emtpy");
+            }
+
+            string args = $"asset={asset}&recvWindow=5000&isIsolated={isIsolated}";
+
+            return await CallAsync<MaxTransferOutAmount>(ApiMethod.GET, EndPoints.MaxTransferOutAmount, true, args);
+        }
+
+
+        #endregion
 
         public async Task<IEnumerable<Candlestick>> GetCandleSticks(string symbol, TimeInterval interval, DateTime? startTime = null, DateTime? endTime = null, int limit = 500)
         {
