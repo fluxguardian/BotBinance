@@ -1,6 +1,7 @@
 ﻿using BotBinanceBL.Stocks.Interfaces;
 using Model.Enums;
-using Model.Models.Account;
+using Model.Models.Account.Margin;
+using Model.Models.Account.Spot;
 using Model.Models.Market;
 using Model.TradingRules;
 using Model.Utils;
@@ -92,23 +93,23 @@ namespace BotBinanceBL.Requests
 
             return await CallAsync<MaxBorrow>(ApiMethod.GET, EndPoints.MaxBorrow, true, args);
         }
-        public async Task<NewOrderMargin> MarketOrderQuantityMargin(string symbol, decimal quantity, OrderSide side, string isIsolated = "FALSE")
+        public async Task<OrderMargin> MarketOrderQuantityMargin(string symbol, decimal quantity, OrderSide side, string isIsolated = "FALSE")
         {
             var args = $"symbol={symbol}&quantity={quantity.ToString(CultureInfo.InvariantCulture)}" +
                 $"&type={OrderType.MARKET}&side={side}" +
                 $"&recvWindow=10000" +
                 $"&isIsolated={isIsolated}";
 
-            return await CallAsync<NewOrderMargin>(ApiMethod.POST, EndPoints.NewOrderMargin, true, args);
+            return await CallAsync<OrderMargin>(ApiMethod.POST, EndPoints.OrderMargin, true, args);
         }
-        public async Task<NewOrderMargin> MarketOrderQuoteMargin(string symbol, decimal quoteOrderQty, OrderSide side, string isIsolated = "FALSE")
+        public async Task<OrderMargin> MarketOrderQuoteMargin(string symbol, decimal quoteOrderQty, OrderSide side, string isIsolated = "FALSE")
         {
             var args = $"symbol={symbol}&quoteOrderQty={quoteOrderQty.ToString(CultureInfo.InvariantCulture)}" +
                 $"&type={OrderType.MARKET}&side={side}" +
                 $"&recvWindow=10000" +
                 $"&isIsolated={isIsolated}";
 
-            return await CallAsync<NewOrderMargin>(ApiMethod.POST, EndPoints.NewOrderMargin, true, args);
+            return await CallAsync<OrderMargin>(ApiMethod.POST, EndPoints.OrderMargin, true, args);
         }
         public async Task<MaxTransferOutAmount> MaxTransferOutAmount(string asset, string isIsolated = "FALSE")
         {
@@ -121,46 +122,103 @@ namespace BotBinanceBL.Requests
 
             return await CallAsync<MaxTransferOutAmount>(ApiMethod.GET, EndPoints.MaxTransferOutAmount, true, args);
         }
+        public async Task<OrderMargin> OrderMarginStopLoss(string symbol, decimal quantity, decimal price, decimal stopPrice, OrderSide orderSide, 
+            OrderType orderType, TimeInForce timeInForce = TimeInForce.GTC)
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentException("symbol cannot be emtpy");
+            }
 
+            var args = $"symbol={symbol}" +
+                $"&type={orderType}&side={orderSide}" +
+                $"&recvWindow=10000" +
+                $"&price={price.ToString(CultureInfo.InvariantCulture)}" +
+                $"&stopPrice={stopPrice.ToString(CultureInfo.InvariantCulture)}" +
+                $"&quantity={quantity.ToString(CultureInfo.InvariantCulture)}" +
+                $"&timeInForce={timeInForce}";
+
+            return await CallAsync<OrderMargin>(ApiMethod.POST, EndPoints.OrderMargin, true, args);
+        }
+        public async Task<CanceledOrderMargin> CancelOrderMargin(string symbol, string origClientOrderId)
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentException("symbol cannot be emtpy");
+            }
+
+            var args = $"symbol={symbol}&origClientOrderId={origClientOrderId}";
+
+            return await CallAsync<CanceledOrderMargin>(ApiMethod.DELETE, EndPoints.OrderMargin, true, args);
+        }
+        public async Task<QueryMarginOrder> QueryMarginOrder(string symbol, string origClientOrderId, string isIsolated = "FALSE")
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentException("symbol cannot be emtpy");
+            }
+
+            var args = $"symbol={symbol}&origClientOrderId={origClientOrderId}&isIsolated={isIsolated}";
+
+            return await CallAsync<QueryMarginOrder>(ApiMethod.GET, EndPoints.OrderMargin, true, args);
+        }
+        public async Task<QueryRepay> QueryRepayRecord(string asset, DateTime startTime, DateTime? endTime = null, long size = 10)
+        {
+            if (string.IsNullOrWhiteSpace(asset))
+            {
+                throw new ArgumentException("asset cannot be empty");
+            }
+            else if(startTime < endTime)
+            {
+                throw new ArgumentException("startTime cannot be less than endTime");
+            }
+            else if(startTime == null)
+            {
+                throw new ArgumentException("startTime cannot be null");
+            }
+
+            var args = $"asset={asset}" +
+                $"&startTime={startTime.GetUnixTimeStamp()}" +
+                (endTime.HasValue ? $"&endTime={endTime.Value.GetUnixTimeStamp()}" : "") +
+                $"&size={size}&recvWindow=5000";
+
+            return await CallAsync<QueryRepay>(ApiMethod.GET, EndPoints.QueryRepayRecord, true, args);
+        }
+        public async Task<QueryMarginAccountDetails> MarginAccountDetails()
+        {
+            return await CallAsync<QueryMarginAccountDetails>(ApiMethod.GET, EndPoints.QueryMarginAccountDetails, true);
+        }
+        public async Task<IEnumerable<MarginTradeList>> MarginTradeLists(string symbol, DateTime? startTime = null, DateTime? endTime = null, 
+            int? fromId = null, string isIsolated = "FALSE", int limit = 500)
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentException("symbol cannot be empty");
+            }
+            else if (startTime < endTime)
+            {
+                throw new ArgumentException("startTime cannot be less than endTime");
+            }
+
+            var args = $"symbol={symbol}" +
+                (startTime.HasValue ? $"&startTime={startTime.Value.GetUnixTimeStamp()}" : "") +
+                (endTime.HasValue ? $"&endTime={endTime.Value.GetUnixTimeStamp()}" : "") +
+                (fromId.HasValue ? $"fromId={fromId}" : "") +
+                $"&isIsolated={isIsolated}" +
+                $"&limit={limit}" +
+                $"&recvWindow=5000";
+
+            return await CallAsync<IEnumerable<MarginTradeList>>(ApiMethod.GET, EndPoints.QueryTradeList, true, args);
+        }
+        public async Task<IEnumerable<MarginAsset>> GetMarginAssets()
+        {
+            return await CallAsync<IEnumerable<MarginAsset>>(ApiMethod.GET, EndPoints.MarginAsset);
+        }
 
         #endregion
 
-        public async Task<IEnumerable<Candlestick>> GetCandleSticks(string symbol, TimeInterval interval, DateTime? startTime = null, DateTime? endTime = null, int limit = 500)
-        {
-            if (string.IsNullOrWhiteSpace(symbol))
-            {
-                throw new ArgumentException("symbol cannot be empty. ", "symbol");
-            }
 
-            var args = $"symbol={symbol}&interval={interval.GetDescription()}"
-                + (startTime.HasValue ? $"&startTime={startTime.Value.GetUnixTimeStamp()}" : "")
-                + (endTime.HasValue ? $"&endTime={endTime.Value.GetUnixTimeStamp()}" : "")
-                + $"&limit={limit}";
-
-            var result = await CallAsync<dynamic>(ApiMethod.GET, EndPoints.Candlesticks, false, args);
-
-            return ExtensionMethods.GetParsedCandlestick(result);
-        }
-        public async Task<AccountInfo> GetAccountInfoAsync(long recvWindow = 5000)
-        {
-            return await CallAsync<AccountInfo>(ApiMethod.GET, EndPoints.AccountInformation, true, $"recvWindow={recvWindow}");
-        }
-        public async Task<IEnumerable<Trade>> GetTradeList(string symbol, int limit = 500, long recvWindow = 5000)
-        {
-            if (string.IsNullOrWhiteSpace(symbol))
-            {
-                throw new ArgumentException("symbol cannot be empty. ", "symbol");
-            }
-
-            return await CallAsync<IEnumerable<Trade>>(ApiMethod.GET, EndPoints.TradeList, true, $"symbol={symbol}&limit={limit}&recvWindow={recvWindow}");
-        }
-        public async Task<TradingRules> GetExchangeInformationAsync()
-        {
-            return await CallAsync<TradingRules>(ApiMethod.GET, EndPoints.ExchangeInfo);
-        }
-
-        #region Orders
-
+        #region Spot
         public async Task<NewOrder> OrderQuantityMarket(string symbol, decimal quantity, OrderSide side)
         {
             string newquantity = quantity.ToString().Replace(',', '.');
@@ -231,7 +289,6 @@ namespace BotBinanceBL.Requests
 
             return await CallAsync<Order>(ApiMethod.GET, EndPoints.QueryOrder, true, args);
         }
-
         public async Task<NewOrder> PostNewOrder(string symbol, decimal quantity, decimal price, OrderSide side, OrderType orderType,
             TimeInForce timeInForce, decimal icebergQty = 0, long recvWindow = 5000)
         {
@@ -281,6 +338,39 @@ namespace BotBinanceBL.Requests
             }
 
             return await CallAsync<IEnumerable<Order>>(ApiMethod.GET, EndPoints.CurrentOpenOrders, true, $"symbol={symbol}&recvWindow={recvWindow}");
+        }
+        public async Task<IEnumerable<Candlestick>> GetCandleSticks(string symbol, TimeInterval interval, DateTime? startTime = null, DateTime? endTime = null, int limit = 500)
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentException("symbol cannot be empty. ", "symbol");
+            }
+
+            var args = $"symbol={symbol}&interval={interval.GetDescription()}"
+                + (startTime.HasValue ? $"&startTime={startTime.Value.GetUnixTimeStamp()}" : "")
+                + (endTime.HasValue ? $"&endTime={endTime.Value.GetUnixTimeStamp()}" : "")
+                + $"&limit={limit}";
+
+            var result = await CallAsync<dynamic>(ApiMethod.GET, EndPoints.Candlesticks, false, args);
+
+            return ExtensionMethods.GetParsedCandlestick(result);
+        }
+        public async Task<AccountInfo> GetAccountInfoAsync(long recvWindow = 5000)
+        {
+            return await CallAsync<AccountInfo>(ApiMethod.GET, EndPoints.AccountInformation, true, $"recvWindow={recvWindow}");
+        }
+        public async Task<IEnumerable<Trade>> GetTradeList(string symbol, int limit = 500, long recvWindow = 5000)
+        {
+            if (string.IsNullOrWhiteSpace(symbol))
+            {
+                throw new ArgumentException("symbol cannot be empty. ", "symbol");
+            }
+
+            return await CallAsync<IEnumerable<Trade>>(ApiMethod.GET, EndPoints.TradeList, true, $"symbol={symbol}&limit={limit}&recvWindow={recvWindow}");
+        }
+        public async Task<TradingRules> GetExchangeInformationAsync()
+        {
+            return await CallAsync<TradingRules>(ApiMethod.GET, EndPoints.ExchangeInfo);
         }
 
         #endregion

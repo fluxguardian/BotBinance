@@ -1,5 +1,5 @@
 ﻿using Model.Enums;
-using Model.Models.Account;
+using Model.Models.Account.Spot;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

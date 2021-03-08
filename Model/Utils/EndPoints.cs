@@ -37,8 +37,12 @@
         public static readonly string Borrow = "/sapi/v1/margin/loan";
         public static readonly string Repay = "/sapi/v1/margin/repay";
         public static readonly string MaxBorrow = "/sapi/v1/margin/maxBorrowable";
-        public static readonly string NewOrderMargin = "/sapi/v1/margin/order";
+        public static readonly string OrderMargin = "/sapi/v1/margin/order";
         public static readonly string MaxTransferOutAmount = "/sapi/v1/margin/maxTransferable";
+        public static readonly string QueryRepayRecord = "/sapi/v1/margin/repay";
+        public static readonly string QueryMarginAccountDetails = "/sapi/v1/margin/account";
+        public static readonly string QueryTradeList = "/sapi/v1/margin/myTrades";
+        public static readonly string MarginAsset = "/sapi/v1/margin/allAssets";
 
         #endregion
     }

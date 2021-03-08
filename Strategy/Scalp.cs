@@ -2,7 +2,7 @@
 using BotBinanceBL.Stocks.Interfaces;
 using BotBinanceBL.Stocks.Signals;
 using Model.Enums;
-using Model.Models.Account;
+using Model.Models.Account.Spot;
 using Model.Models.Market;
 using Model.TradingRules;
 using Strategy.TradeSettings;

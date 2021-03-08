@@ -1,8 +1,10 @@
 ﻿using BotBinanceBL.Stocks.Signals;
 using Model.Enums;
-using Model.Models.Account;
+using Model.Models.Account.Margin;
+using Model.Models.Account.Spot;
 using Model.Models.Market;
 using Model.TradingRules;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -26,7 +28,16 @@ namespace BotBinanceBL.Stocks.Interfaces
         Task<AccountBorrow> BorrowAsync(string asset, decimal amount, string isIsolated = "FALSE");
         Task<AccountRepay> RepayAsync(string asset, decimal amount, string isIsolated = "FALSE");
         Task<MaxBorrow> MaxBorrowAsync(string asset);
-        Task<NewOrderMargin> MarketOrderMarginAsync(string symbol, decimal quantity, OrderSide side, string isIsolated = "FALSE");
+        Task<OrderMargin> MarketOrderMarginAsync(string symbol, decimal quantity, OrderSide side, string isIsolated = "FALSE");
+        Task<OrderMargin> OrderMarginStopLossAsync(string symbol, decimal quantity, decimal price, decimal stopPrice,
+            OrderSide orderSide, OrderType orderType, TimeInForce timeInForce = TimeInForce.GTC);
         Task<MaxTransferOutAmount> MaxTransferOutAmountAsync(string asset, string isIsolated = "FALSE");
+        Task<CanceledOrderMargin> CancelOrderMarginAsync(OrderMargin orderMargin);
+        Task<QueryMarginOrder> QueryMarginOrderAsync(OrderMargin orderMargin);
+        Task<QueryRepay> QueryRepayRecordAsync(string asset, DateTime startTime, DateTime? endTime = null, long size = 10);
+        Task<QueryMarginAccountDetails> MarginAccountDetailsAsync();
+        Task<IEnumerable<MarginTradeList>> MarginTradeListsAsync(string symbol, DateTime? startTime = null, DateTime? endTime = null,
+            int? fromId = null, string isIsolated = "FALSE", int limit = 500);
+        Task<IEnumerable<MarginAsset>> GetMarginAssetsAsync();
     }
 }

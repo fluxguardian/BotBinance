@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace Model.Models.Account
+namespace Model.Models.Account.Spot
 {
     public class OCOOrder
     {

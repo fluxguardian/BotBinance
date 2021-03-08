@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace Model.Models.Account
+namespace Model.Models.Account.Spot
 {
-    public class NewOrder
+    public class CanceledOrder
     {
         [JsonProperty("symbol")]
         public string Symbol { get; set; }
@@ -10,7 +10,7 @@ namespace Model.Models.Account
         public int OrderId { get; set; }
         [JsonProperty("clientOrderId")]
         public string ClientOrderId { get; set; }
-        [JsonProperty("transactTime")]
-        public long TransactTime { get; set; }
+        [JsonProperty("origClientOrderId ")]
+        public string OrigClientOrderId { get; set; }
     }
 }

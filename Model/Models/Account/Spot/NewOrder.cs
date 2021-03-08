@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace Model.Models.Account
+namespace Model.Models.Account.Spot
 {
-    public class NewOrderMargin
+    public class NewOrder
     {
         [JsonProperty("symbol")]
         public string Symbol { get; set; }

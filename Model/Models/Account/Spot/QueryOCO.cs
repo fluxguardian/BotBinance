@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Model.Models.Account
+namespace Model.Models.Account.Spot
 {
     public class QueryOCO
     {

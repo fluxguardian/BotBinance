@@ -2,7 +2,8 @@
 using BotBinanceBL.Stocks.Interfaces;
 using BotBinanceBL.Stocks.Signals;
 using Model.Enums;
-using Model.Models.Account;
+using Model.Models.Account.Margin;
+using Model.Models.Account.Spot;
 using Model.Models.Market;
 using Model.TradingRules;
 using System;
@@ -15,16 +16,11 @@ namespace BotBinanceBL.Stocks
     public class Binance : IStock
     {
         private string _url { get; set; } = "https://api.binance.com";
-        private string _key { get; set; }
-        private string _secretKey { get; set; }
 
         private BinanceRequest _binanceRequest { get; set; }
 
         public Binance(string key, string secretKey)
         {
-            _key = key;
-            _secretKey = secretKey;
-
             _binanceRequest = new BinanceRequest(new HttpUtilities(_url, key, secretKey));
         }
 
@@ -62,7 +58,7 @@ namespace BotBinanceBL.Stocks
             }
             catch { throw new Exception($"Ошибка в методе MaxBorrowAsync ({DateTime.Now})"); }
         }
-        public async Task<NewOrderMargin> MarketOrderMarginAsync(string symbol, decimal baseAssetQuantity, OrderSide side, string isIsolated = "FALSE")
+        public async Task<OrderMargin> MarketOrderMarginAsync(string symbol, decimal baseAssetQuantity, OrderSide side, string isIsolated = "FALSE")
         {
             try
             {
@@ -78,7 +74,64 @@ namespace BotBinanceBL.Stocks
             }
             catch { throw new Exception($"Ошибка в методе MaxTransferOutAmountAsync {DateTime.Now}"); }
         }
+        public async Task<OrderMargin> OrderMarginStopLossAsync(string symbol, decimal quantity, decimal price, decimal stopPrice, 
+            OrderSide orderSide, OrderType orderType, TimeInForce timeInForce = TimeInForce.GTC)
+        {
+            try
+            {
+                return await _binanceRequest.OrderMarginStopLoss(symbol, quantity, price, stopPrice, orderSide, orderType, timeInForce);
+            }
+            catch { throw new Exception($"Ошибка в методе OrderMarginStopLossAsync {DateTime.Now}"); }
+        }
+        public async Task<CanceledOrderMargin> CancelOrderMarginAsync(OrderMargin orderMargin)
+        {
+            try
+            {
+                return await _binanceRequest.CancelOrderMargin(orderMargin.Symbol, orderMargin.ClientOrderId);
+            }
+            catch { throw new Exception($"Ошибка в методе CancelOrderMarginAsync {DateTime.Now}"); }
+        }
+        public async Task<QueryMarginOrder> QueryMarginOrderAsync(OrderMargin orderMargin)
+        {
+            try
+            {
+                return await _binanceRequest.QueryMarginOrder(orderMargin.Symbol, orderMargin.ClientOrderId, orderMargin.IsIsolated.ToString().ToUpper());
+            }
+            catch { throw new Exception($"Ошибка в методе QueryMarginOrderAsync {DateTime.Now}"); }
+        }
+        public async Task<QueryRepay> QueryRepayRecordAsync(string asset, DateTime startTime, DateTime? endTime = null, long size = 10)
+        {
+            try
+            {
+                return await _binanceRequest.QueryRepayRecord(asset, startTime, endTime, size);
+            }
+            catch { throw new Exception($"Ошибка в методе QueryRepayAsync {DateTime.Now}"); }
+        }
+        public async Task<QueryMarginAccountDetails> MarginAccountDetailsAsync()
+        {
+            try
+            {
+                return await _binanceRequest.MarginAccountDetails();
+            }
+            catch { throw new Exception($"Ошибка в методе MarginAccountDetailsAsync {DateTime.Now}"); }
+        }
+        public async Task<IEnumerable<MarginTradeList>> MarginTradeListsAsync(string symbol, DateTime? startTime = null, DateTime? endTime = null, int? fromId = null, string isIsolated = "FALSE", int limit = 500)
+        {
+            try
+            {
+                return await _binanceRequest.MarginTradeLists(symbol, startTime, endTime, fromId, isIsolated, limit);
+            }
+            catch { throw new Exception($"Ошибка в методе MarginTradeListsAsync {DateTime.Now}"); }
+        }
 
+        public async Task<IEnumerable<MarginAsset>> GetMarginAssetsAsync()
+        {
+            try
+            {
+                return await _binanceRequest.GetMarginAssets();
+            }
+            catch { throw new Exception($"Ошибка в методе GetMarginAssetsAsync {DateTime.Now}"); }
+        }
         #endregion
 
         #region Spot methods
@@ -225,7 +278,5 @@ namespace BotBinanceBL.Stocks
             signal.StopLoss += 0.2m;
             signal.StopLimitPrice += 0.2m;
         }
-
-        
     }
 }
