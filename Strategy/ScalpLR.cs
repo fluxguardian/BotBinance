@@ -6,6 +6,7 @@ using Model.Models.Market;
 using Model.TradingRules;
 using Model.Utils;
 using Strategy.TradeSettings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,6 +48,8 @@ namespace Strategy
 
         public async Task Logic()
         {
+            Console.WriteLine("Start trade");
+
             for (uint i = 0; i < uint.MaxValue; i++)
             {
                 try
@@ -62,18 +65,26 @@ namespace Strategy
                         // Входим в лонг позицию
                         await LongEntryPosition();
 
+                        Console.WriteLine($"Вошли в лонг позицию {DateTime.Now}");
+
                         await Task.Delay(5000);
 
                         // Выходим из лонг позиции
                         await LongExitPosition();
+
+                        Console.WriteLine($"Вышли из лонг позицию {DateTime.Now}");
                     }
                     else if (sellSignalSMA)
                     {
                         await ShortEntryPosition();
 
+                        Console.WriteLine($"Вошли в шорт позицию {DateTime.Now}");
+
                         await Task.Delay(5000);
 
                         await ShortExitPosition();
+
+                        Console.WriteLine($"Вышли из шорт позицию {DateTime.Now}");
                     }
 
                     await Task.Delay(candles.Last().GetTimeSleepMilliseconds() + 2500);
