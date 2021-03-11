@@ -16,13 +16,77 @@ namespace BotBinanceBL.Stocks
     public class Binance : IStock
     {
         private string _url { get; set; } = "https://api.binance.com";
-
         private BinanceRequest _binanceRequest { get; set; }
 
         public Binance(string key, string secretKey)
         {
             _binanceRequest = new BinanceRequest(new HttpUtilities(_url, key, secretKey));
         }
+
+        #region Margin Trades
+
+        /// <summary>
+        /// Получаем максимальное кол-во занимаемой валюты
+        /// </summary>
+        /// <param name="asset">Валюта (LINK, USDT, BTC и т.д)</param>
+        /// <returns>Максимальное кол-во занимаемой валюты</returns>
+        public async Task<decimal> GetMaxBorrowAsset(string asset)
+        {
+            // Узнаем максимальное количество валюты, которое можем занять у биржы при нашем счете
+            MaxBorrow borrow = await _binanceRequest.MaxBorrow(asset);
+
+            return borrow.Amount;
+        }
+
+        /// <summary>
+        /// Заем базового актива у биржы
+        /// </summary>
+        /// <param name="asset">Базовая валюта. Например, валютная пара LINKUSDT, в которой LINK является базовой)</param>
+        /// <returns></returns>
+        public async Task<AccountBorrow> BorrowBaseAsset(string asset, decimal amountBorrow)
+        {
+            return await _binanceRequest.Borrow(asset, amountBorrow);
+        }
+
+        /// <summary>
+        /// Заем котируемого актива у биржы
+        /// </summary>
+        /// <param name="asset">Основная валюта. Например, валютная пара LINKUSDT, в которой USDT является котируемой)</param>
+        /// <returns></returns>
+        public async Task<AccountBorrow> BorrowQuoteAsset(string asset, decimal amountBorrow)
+        {
+            return await _binanceRequest.Borrow(asset, amountBorrow);
+        }
+
+        /// <summary>
+        /// Узнаем кол-во валюты, которое необходимо возместить бирже
+        /// </summary>
+        /// <param name="asset">Возмещаемая валюта</param>
+        /// <returns>Количество</returns>
+        private async Task<decimal> GetAmountRepay(string asset)
+        {
+            QueryMarginAccountDetails accountDetails = await _binanceRequest.MarginAccountDetails();
+
+            IEnumerable<UserAsset> repay = accountDetails.UserAssets.Where(x => x.Asset.Equals(asset));
+
+            return repay.FirstOrDefault().Borrowed;
+        }
+
+        public async Task<AccountRepay> RepayQuoteAsset(string asset)
+        {
+            decimal amountRepay = await GetAmountRepay(asset);
+
+            return await _binanceRequest.Repay(asset, amountRepay);
+        }
+        public async Task<AccountRepay> RepayBaseAsset(string asset)
+        {
+            decimal amountRepay = await GetAmountRepay(asset);
+
+            return await _binanceRequest.Repay(asset, amountRepay);
+        }
+    
+
+        #endregion
 
         #region Margin methods
 
@@ -34,37 +98,21 @@ namespace BotBinanceBL.Stocks
             }
             catch { throw new Exception($"Ошибка в методе TransferAsync ({DateTime.Now})"); }
         }
-        public async Task<AccountBorrow> BorrowAsync(string asset, decimal amount, string isIsolated = "FALSE")
-        {
-            try
-            {
-                return await _binanceRequest.Borrow(asset, amount, isIsolated);
-            }
-            catch { throw new Exception($"Ошибка в методе BorrowAsync ({DateTime.Now})"); }
-        }
-        public async Task<AccountRepay> RepayAsync(string asset, decimal amount, string isIsolated = "FALSE")
-        {
-            try
-            {
-                return await _binanceRequest.Repay(asset, amount, isIsolated);
-            }
-            catch { throw new Exception($"Ошибка в методе RepayAsync ({DateTime.Now})"); }
-        }
-        public async Task<MaxBorrow> MaxBorrowAsync(string asset)
-        {
-            try
-            {
-                return await _binanceRequest.MaxBorrow(asset);
-            }
-            catch { throw new Exception($"Ошибка в методе MaxBorrowAsync ({DateTime.Now})"); }
-        }
-        public async Task<OrderMargin> MarketOrderMarginAsync(string symbol, decimal baseAssetQuantity, OrderSide side, string isIsolated = "FALSE")
+        public async Task<OrderMargin> MarketOrderQuantityMarginAsync(string symbol, decimal baseAssetQuantity, OrderSide side, string isIsolated = "FALSE")
         {
             try
             {
                 return await _binanceRequest.MarketOrderQuantityMargin(symbol, baseAssetQuantity, side);
             }
             catch { throw new Exception($"Ошибка в методе MarketOrderMarginAsync {DateTime.Now}"); }
+        }
+        public async Task<OrderMargin> MarketOrderQuoteMarginAsync(string symbol, decimal quoteOrderQty, OrderSide side, string isIsolated = "FALSE")
+        {
+            try
+            {
+                return await _binanceRequest.MarketOrderQuoteMargin(symbol, quoteOrderQty, side);
+            }
+            catch { throw new Exception($"Ошибка в методе MarketOrderQuoteMargin {DateTime.Now}"); }
         }
         public async Task<MaxTransferOutAmount> MaxTransferOutAmountAsync(string asset, string isIsolated = "FALSE")
         {
@@ -123,7 +171,6 @@ namespace BotBinanceBL.Stocks
             }
             catch { throw new Exception($"Ошибка в методе MarginTradeListsAsync {DateTime.Now}"); }
         }
-
         public async Task<IEnumerable<MarginAsset>> GetMarginAssetsAsync()
         {
             try
@@ -132,6 +179,7 @@ namespace BotBinanceBL.Stocks
             }
             catch { throw new Exception($"Ошибка в методе GetMarginAssetsAsync {DateTime.Now}"); }
         }
+
         #endregion
 
         #region Spot methods
@@ -277,6 +325,6 @@ namespace BotBinanceBL.Stocks
             signal.Price += 0.2m;
             signal.StopLoss += 0.2m;
             signal.StopLimitPrice += 0.2m;
-        }
+        }        
     }
 }
