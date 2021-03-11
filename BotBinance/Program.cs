@@ -14,12 +14,12 @@ namespace BotBinance
         {
             Client client = new Client(new Binance(Settings.Key, Settings.SecretKey));
 
-            //client.AddStrategy(new ScalpSMA("LINKUSDT", TimeInterval.Minutes_3, "flaxmine"));
-            client.AddStrategy(new RsiSignal(new List<string>()
-            { 
-                "LINKUSDT", "UNIUSDT", "XRPUSDT", "ETHUSDT", "BNBUSDT", "DOGEUSDT", "ADAUSDT", "XRPUSDT"
-            }, 
-            10, TimeInterval.Minutes_3));
+            client.AddStrategy(new ScalpLR("LINKUSDT", TimeInterval.Minutes_3, "flaxmine"));
+            //client.AddStrategy(new RsiSignal(new List<string>()
+            //{ 
+            //    "LINKUSDT", "UNIUSDT", "XRPUSDT", "ETHUSDT", "BNBUSDT", "DOGEUSDT", "ADAUSDT", "XRPUSDT"
+            //}, 
+            //10, TimeInterval.Minutes_3));
             client.StartStrategies();
 
             //Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
