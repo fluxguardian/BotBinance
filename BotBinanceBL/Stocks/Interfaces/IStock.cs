@@ -25,10 +25,13 @@ namespace BotBinanceBL.Stocks.Interfaces
         Task<decimal> GetLastBuyPriceAsync(string symbol);
         Task<decimal> GetCurrentPrice(string symbol, TimeInterval timeInterval);
         Task<AccountTransfer> TransferAsync(string asset, decimal amount, TransferType transferType);
-        Task<AccountBorrow> BorrowAsync(string asset, decimal amount, string isIsolated = "FALSE");
-        Task<AccountRepay> RepayAsync(string asset, decimal amount, string isIsolated = "FALSE");
-        Task<MaxBorrow> MaxBorrowAsync(string asset);
-        Task<OrderMargin> MarketOrderMarginAsync(string symbol, decimal quantity, OrderSide side, string isIsolated = "FALSE");
+        Task<decimal> GetMaxBorrowAsset(string asset);
+        Task<AccountBorrow> BorrowBaseAsset(string asset, decimal amountBorrow);
+        Task<AccountBorrow> BorrowQuoteAsset(string asset, decimal amountBorrow);
+        Task<AccountRepay> RepayQuoteAsset(string asset);
+        Task<AccountRepay> RepayBaseAsset(string asset);
+        Task<OrderMargin> MarketOrderQuantityMarginAsync(string symbol, decimal quantity, OrderSide side, string isIsolated = "FALSE");
+        Task<OrderMargin> MarketOrderQuoteMarginAsync(string symbol, decimal quoteOrderQty, OrderSide side, string isIsolated = "FALSE");
         Task<OrderMargin> OrderMarginStopLossAsync(string symbol, decimal quantity, decimal price, decimal stopPrice,
             OrderSide orderSide, OrderType orderType, TimeInForce timeInForce = TimeInForce.GTC);
         Task<MaxTransferOutAmount> MaxTransferOutAmountAsync(string asset, string isIsolated = "FALSE");
