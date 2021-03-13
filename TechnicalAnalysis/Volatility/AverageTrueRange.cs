@@ -14,9 +14,12 @@ namespace TechnicalAnalysis.Volatility
             Period = period;
         }
 
-        public decimal GetATR(List<Candlestick> candlesticks)
+        public List<decimal> GetATR(List<Candlestick> candlesticks)
         {
             decimal atr = GetFirstATR(candlesticks);
+            List<decimal> lstValues = new List<decimal>();
+
+            lstValues.Add(atr);
 
             for (int i = Period + 1; i < candlesticks.Count; i++)
             {
@@ -24,8 +27,10 @@ namespace TechnicalAnalysis.Volatility
                     Math.Max(Math.Abs(candlesticks[i].High - candlesticks[i - 1].Close), candlesticks[i].High - candlesticks[i].Low));
 
                 atr = (atr * (Period - 1) + trueRange) / Period;
+
+                lstValues.Add(atr);
             }
-            return atr;
+            return lstValues;
         }
 
         private decimal GetFirstATR(List<Candlestick> candlesticks)
