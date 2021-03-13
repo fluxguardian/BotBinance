@@ -100,6 +100,30 @@ namespace TechnicalAnalysis.Trends
             }
             return false;
         }
+
+        public bool BuySignal(List<decimal> prices)
+        {
+            LinearRegressionCurve shortAverage = GetValuesCurve(prices, ShortPeriod).SkipLast(1).Last();
+            LinearRegressionCurve longAverage = GetValuesCurve(prices, LongPeriod).SkipLast(1).Last();
+
+            if (shortAverage.ValueCurve > longAverage.ValueCurve)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool SellSignal(List<decimal> prices)
+        {
+            LinearRegressionCurve shortAverage = GetValuesCurve(prices, ShortPeriod).SkipLast(1).Last();
+            LinearRegressionCurve longAverage = GetValuesCurve(prices, LongPeriod).SkipLast(1).Last();
+
+            if (shortAverage.ValueCurve < longAverage.ValueCurve)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 
     public class LinearRegressionCurve
