@@ -4,7 +4,6 @@ using BotBinanceBL.Stocks;
 using Model.Enums;
 using Strategy;
 using System;
-using System.Collections.Generic;
 
 namespace BotBinance
 {
@@ -14,18 +13,13 @@ namespace BotBinance
         {
             Client client = new Client(new Binance(Settings.Key, Settings.SecretKey));
 
-            client.AddStrategy(new ScalpLR("LINKUSDT", TimeInterval.Minutes_3, "flaxmine"));
-            //client.AddStrategy(new RsiSignal(new List<string>()
-            //{ 
-            //    "LINKUSDT", "UNIUSDT", "XRPUSDT", "ETHUSDT", "BNBUSDT", "DOGEUSDT", "ADAUSDT", "XRPUSDT"
-            //}, 
-            //10, TimeInterval.Minutes_3));
+            client.AddStrategy(new Scalp("BTCUSDT", TimeInterval.Minutes_3, "flaxmine"));
             client.StartStrategies();
 
-            //Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
+            Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
 
-            //clientKirill.AddStrategy(new Scalp("LINKUSDT", TimeInterval.Minutes_3, "Kirill"));
-            //clientKirill.StartStrategies();
+            clientKirill.AddStrategy(new Scalp("BTCUSDT", TimeInterval.Minutes_3, "Kirill"));
+            clientKirill.StartStrategies();
 
             Console.ReadKey();
         }
