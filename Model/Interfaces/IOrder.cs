@@ -19,5 +19,6 @@ namespace Model.Interfaces
         Task<NewOrder> OrderQuantityMarket(string symbol, decimal quantity, OrderSide side);
         Task<NewOrder> OrderQuoteMarket(string symbol, decimal quoteOrderQty, OrderSide side);
         Task<QueryOCO> CancelOCO(string symbol, string listClientOrderId);
+        Task<List<OpenOCOOrder>> QueryOpenOCO();
     }
 }
