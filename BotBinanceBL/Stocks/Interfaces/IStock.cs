@@ -21,7 +21,7 @@ namespace BotBinanceBL.Stocks.Interfaces
         Task<AccountInfo> GetAccountInformation();
         Task<Symbol> GetExchangeInformationAsync(string symbol);
         Task TrailingOCO(Signal signal, TimeInterval timeInterval);
-        Task<IEnumerable<Candlestick>> GetCandlestickAsync(string symbol, TimeInterval timeInterval, int quantity = 50);
+        Task<IEnumerable<Candlestick>> GetCandlestickAsync(string symbol, TimeInterval timeInterval, DateTime? startTime = null, DateTime? endTime = null, int quantity = 50);
         Task<decimal> GetLastBuyPriceAsync(string symbol);
         Task<decimal> GetCurrentPrice(string symbol, TimeInterval timeInterval);
         Task<AccountTransfer> TransferAsync(string asset, decimal amount, TransferType transferType);
@@ -42,5 +42,6 @@ namespace BotBinanceBL.Stocks.Interfaces
         Task<IEnumerable<MarginTradeList>> MarginTradeListsAsync(string symbol, DateTime? startTime = null, DateTime? endTime = null,
             int? fromId = null, string isIsolated = "FALSE", int limit = 500);
         Task<IEnumerable<MarginAsset>> GetMarginAssetsAsync();
+        Task<List<QueryOrder>> GetOpenOCO(string symbol);
     }
 }
