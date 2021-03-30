@@ -42,7 +42,7 @@ namespace BotBinanceBL
             return await _httpClient.SendAsync(request).ConfigureAwait(false);
         }
 
-        public string GetFinalPoint(string endpoint, bool isSigned, ref string parameters)
+        public string GetFinalPoint(string endpoint, bool isSigned, string parameters)
         {
             string finalEndpoint = endpoint + (string.IsNullOrWhiteSpace(parameters) ? "" : $"?{parameters}");
 
