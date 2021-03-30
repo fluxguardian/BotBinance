@@ -242,6 +242,16 @@ namespace BotBinanceBL.Stocks
             }
             catch { throw new Exception($"Ошибка в методе PostOrderOCOAsync ({DateTime.Now})"); }
         }
+        public async Task<List<QueryOrder>> GetOpenOCO(string symbol)
+        {
+            try
+            {
+                List<OpenOCOOrder> opensOrders = await _binanceRequest.QueryOpenOCO();
+
+                return opensOrders.SelectMany(o => o.Orders.Where(x => x.Symbol.Equals(symbol))).ToList();
+            }
+            catch { throw new Exception($"Ошибка в методе GetOpenOCO ({DateTime.Now})"); }
+        }
         public async Task<NewOrder> TakeMarketOrder(Signal signal)
         {
             try
@@ -266,9 +276,9 @@ namespace BotBinanceBL.Stocks
 
             return result.Symbols.Where(s => symbol.Contains(s.SymbolName)).FirstOrDefault();
         }
-        public async Task<IEnumerable<Candlestick>> GetCandlestickAsync(string symbol, TimeInterval timeInterval, int quantity = 50)
+        public async Task<IEnumerable<Candlestick>> GetCandlestickAsync(string symbol, TimeInterval timeInterval, DateTime? startTime = null, DateTime? endTime = null, int quantity = 50)
         {
-            return await _binanceRequest.GetCandleSticks(symbol, timeInterval, limit: quantity);
+            return await _binanceRequest.GetCandleSticks(symbol, timeInterval, startTime, endTime, limit: quantity);
         }
         public async Task<decimal> GetLastBuyPriceAsync(string symbol)
         {
@@ -278,7 +288,7 @@ namespace BotBinanceBL.Stocks
         }
         public async Task<decimal> GetCurrentPrice(string symbol, TimeInterval timeInterval)
         {
-            IEnumerable<Candlestick> candle = await GetCandlestickAsync(symbol, timeInterval, 1);
+            IEnumerable<Candlestick> candle = await GetCandlestickAsync(symbol, timeInterval, quantity: 1);
 
             return candle.Last().Close;
         }
@@ -298,7 +308,7 @@ namespace BotBinanceBL.Stocks
 
                     if (!runningOrder.ListOrderStatus.Equals("ALL_DONE"))
                     {
-                        IEnumerable<Candlestick> candlestick = await GetCandlestickAsync(signal.Symbol, timeInterval, 1);
+                        IEnumerable<Candlestick> candlestick = await GetCandlestickAsync(signal.Symbol, timeInterval, quantity: 1);
 
                         if (signal.Price - candlestick.First().Close <= 0.2m)
                         {                        
@@ -325,6 +335,8 @@ namespace BotBinanceBL.Stocks
             signal.Price += 0.2m;
             signal.StopLoss += 0.2m;
             signal.StopLimitPrice += 0.2m;
-        }        
+        }
+
+        
     }
 }
