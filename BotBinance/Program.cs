@@ -11,14 +11,14 @@ namespace BotBinance
     {
         static void Main(string[] args)
         {
-            Client client = new Client(new Binance(Settings.Key, Settings.SecretKey));
+            //Client client = new Client(new Binance(Settings.Key, Settings.SecretKey));
 
-            client.AddStrategy(new Scalp("BTCUSDT", TimeInterval.Minutes_3, "flaxmine"));
-            client.StartStrategies();
+            //client.AddStrategy(new Slope("flaxmine", "ETHUSDT", TimeInterval.Minutes_5));
+            //client.StartStrategies();
 
             Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
 
-            clientKirill.AddStrategy(new Scalp("BTCUSDT", TimeInterval.Minutes_3, "Kirill"));
+            clientKirill.AddStrategy(new Slope("Kirill", "ETHUSDT", TimeInterval.Minutes_5));
             clientKirill.StartStrategies();
 
             Console.ReadKey();
