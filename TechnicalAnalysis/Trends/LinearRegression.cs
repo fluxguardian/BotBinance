@@ -13,6 +13,10 @@ namespace TechnicalAnalysis.Trends
             ShortPeriod = shortPeriod;
             LongPeriod = longPeriod;
         }
+        public LinearRegression()
+        {
+
+        }
 
         public List<LinearRegressionCurve> GetValuesCurve(List<decimal> prices, int period)
         {
@@ -51,21 +55,24 @@ namespace TechnicalAnalysis.Trends
             decimal a = (period * Sxy - Sx * Sy) / (period * Sxx - Sx * Sx);
             decimal b = (Sy - a * Sx) / period;
 
+            decimal linearValue = a * period + b; // y = 4.11*x+59943.76 // y = 2.97x+60011
+
             #endregion
 
             #region Среднеквадратическое отклонение
 
-            decimal linearValue = a * period + b;
-
             y_prices.ForEach(x => sum += Math.Pow(Convert.ToDouble(x - linearValue), 2));
 
             decimal stdDev = Convert.ToDecimal(Math.Sqrt(sum / period));
-
+            //decimal slope = a * 100.0m / y_prices.Last();
+            decimal slope = a * 100.0m;
             #endregion
 
             return new LinearRegressionCurve()
             {
                 ValueCurve = linearValue,
+                Slope = slope,
+                Angle = Convert.ToDecimal(Math.Atan(Convert.ToDouble(slope / y_prices.Last())) * (180 / Math.PI)),
                 LinearRegressionBands = new LinearRegressionBands()
                 {
                     UpLine = linearValue + (2.0m * stdDev),
@@ -87,7 +94,6 @@ namespace TechnicalAnalysis.Trends
             }
             return false;
         }
-
         public bool SellSignalCross(IEnumerable<decimal> prices)
         {
             List<LinearRegressionCurve> shortLR = GetValuesCurve(prices.ToList(), ShortPeriod);
@@ -100,7 +106,6 @@ namespace TechnicalAnalysis.Trends
             }
             return false;
         }
-
         public bool BuySignal(List<decimal> prices)
         {
             LinearRegressionCurve shortAverage = GetValuesCurve(prices, ShortPeriod).SkipLast(1).Last();
@@ -112,7 +117,6 @@ namespace TechnicalAnalysis.Trends
             }
             return false;
         }
-
         public bool SellSignal(List<decimal> prices)
         {
             LinearRegressionCurve shortAverage = GetValuesCurve(prices, ShortPeriod).SkipLast(1).Last();
@@ -129,6 +133,8 @@ namespace TechnicalAnalysis.Trends
     public class LinearRegressionCurve
     {
         public decimal ValueCurve { get; set; }
+        public decimal Slope { get; set; }
+        public decimal Angle { get; set; }
         public LinearRegressionBands LinearRegressionBands { get; set; }
     }
     public class LinearRegressionBands
