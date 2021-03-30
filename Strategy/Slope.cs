@@ -42,9 +42,6 @@ namespace Strategy
         {
             _stock = stock;
 
-            _asset = _stock.GetExchangeInformationAsync(_symbol).Result;
-            _normalization = new Normalization(_asset);
-
             Logic().Wait();
         }
 
