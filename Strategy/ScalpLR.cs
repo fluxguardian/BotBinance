@@ -33,7 +33,7 @@ namespace Strategy
             _timeInterval = timeInterval;
             _name = name;
 
-            _linearRegression = new LinearRegression(shortPeriod: 50, longPeriod: 100);
+            _linearRegression = new LinearRegression(shortPeriod: 90, longPeriod: 200);
         }
 
         public void Trade(IStock stock)
@@ -42,6 +42,8 @@ namespace Strategy
 
             _asset = _stock.GetExchangeInformationAsync(_symbol).Result;
             _normalization = new Normalization(_asset);
+
+            LongExitPosition().Wait();
 
             Logic().Wait();
         }
@@ -54,7 +56,9 @@ namespace Strategy
             {
                 try
                 {
-                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, _linearRegression.LongPeriod + 2);
+                    Console.WriteLine("Ждем  сигнал");
+
+                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: _linearRegression.LongPeriod + 2);
                     IEnumerable<decimal> pricesClose = candles.Select(x => x.Close);
 
                     bool buySignalSMA = _linearRegression.BuySignalCross(pricesClose);
@@ -72,7 +76,7 @@ namespace Strategy
                         // Выходим из лонг позиции
                         await LongExitPosition();
 
-                        Console.WriteLine($"Вышли из лонг позицию {DateTime.Now}");
+                        Console.WriteLine($"Вышли из лонг позиции {DateTime.Now}");
                     }
                     else if (sellSignalSMA)
                     {
@@ -84,7 +88,7 @@ namespace Strategy
 
                         await ShortExitPosition();
 
-                        Console.WriteLine($"Вышли из шорт позицию {DateTime.Now}");
+                        Console.WriteLine($"Вышли из шорт позиции {DateTime.Now}");
                     }
 
                     await Task.Delay(candles.Last().GetTimeSleepMilliseconds() + 2500);
@@ -113,7 +117,7 @@ namespace Strategy
             {
                 try
                 {
-                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, 2);
+                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 2);
 
                     // Профит
                     if (candles.FirstOrDefault().Close <= lastSellPrice / 1.025m)
@@ -154,10 +158,10 @@ namespace Strategy
             {
                 try
                 {
-                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, 2);
+                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 2);
 
                     // Профит
-                    if (candles.First().Close >= lastBuyPrice * 1.03m)
+                    if (candles.First().Close >= lastBuyPrice * 1.025m)
                     {
                         await ExitLong();
                         break;
@@ -188,7 +192,7 @@ namespace Strategy
         private async Task ExitLong()
         {
             // Продаем занимаемое кол-во валюты
-            OrderMargin marketSell = await _stock.MarketOrderQuoteMarginAsync(_symbol, BorrowedQuoteAsset, OrderSide.SELL);
+            OrderMargin marketSell = await _stock.MarketOrderQuoteMarginAsync(_symbol, 14.7506m, OrderSide.SELL);
             await Task.Delay(3000);
 
             // Возмещаем бирже
