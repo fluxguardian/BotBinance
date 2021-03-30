@@ -160,7 +160,7 @@ namespace Strategy
                         {
                             Symbol = _symbol,
                             Side = OrderSide.BUY,
-                            Quantity = _normalization.NormalizeBuy(balance.First().Free)
+                            Quantity = _normalization.NormalizeBuy(balance.First().Free * 0.5m)
                         });
                         break;
                     }
