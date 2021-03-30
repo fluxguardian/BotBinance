@@ -26,12 +26,13 @@ namespace BotBinanceBL.Requests
 
         public async Task<T> CallAsync<T>(ApiMethod method, string endpoint, bool isSigned = false, string parameters = null)
         {
-            string finalEndpoint = _httpUtilities.GetFinalPoint(endpoint, isSigned, ref parameters);
+            string finalEndpoint = _httpUtilities.GetFinalPoint(endpoint, isSigned, parameters);
 
             HttpResponseMessage response = await _httpUtilities.GetHttpResponse(method, finalEndpoint);
 
             if (response.IsSuccessStatusCode)
             {
+              
                 response.EnsureSuccessStatusCode();
 
                 string result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -241,6 +242,11 @@ namespace BotBinanceBL.Requests
         {
             return await CallAsync<QueryOCO>(ApiMethod.GET, EndPoints.QueryOCO, true, $"orderListId={orderListId}&recvWindow=5000");
         }
+        public async Task<List<OpenOCOOrder>> QueryOpenOCO()
+        {
+            return await CallAsync<List<OpenOCOOrder>>(ApiMethod.GET, EndPoints.QueryOpenOCO, true, "recvWindow=5000");
+        }
+
         public async Task<CanceledOrder> CancelOrder(string symbol, long? orderId = null, string origClientOrderId = null, long recvWindow = 5000)
         {
             if (string.IsNullOrWhiteSpace(symbol))
