@@ -28,8 +28,6 @@ namespace Strategy
         public void Trade(IStock stock)
         {
             Stock = stock;
-            
-            //GetSignal(Symbols.First()).Wait();
 
             var result = Symbols.Select(x => GetSignal(x)).ToList();
 
@@ -59,7 +57,7 @@ namespace Strategy
 
                     var timeSleep = (int)(closeTime - DateTime.Now).TotalMilliseconds;
 
-                    await Task.Delay(timeSleep);
+                    await Task.Delay(timeSleep + 2500);
                 }
                 catch { Console.WriteLine($"Ошибка: {symbol}"); await Task.Delay(1500); continue; }
             }
