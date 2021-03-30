@@ -10,6 +10,7 @@ using Strategy.TradeSettings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TechnicalAnalysis.Oscillators;
 using TechnicalAnalysis.Trends;
@@ -67,6 +68,8 @@ namespace Strategy
                         Console.WriteLine($"{_name}: ожидаем вход в рынок {DateTime.Now}");
 
                         await Buy();
+
+                        await Task.Delay(10000);
                     }
                     else
                     {
@@ -74,7 +77,7 @@ namespace Strategy
 
                         await Sell();
 
-                        await Task.Delay(2500);
+                        await Task.Delay(15000);
 
                         #region Баланс после продажи
 
@@ -85,7 +88,7 @@ namespace Strategy
                         #endregion
                     }
 
-                    await Task.Delay(2000);
+                    await Task.Delay((60 - DateTime.Now.Second) * 1000);
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); }
             }
@@ -97,11 +100,9 @@ namespace Strategy
             List<Balance> balances = await _stock.GetBalance(_asset);
 
             Signal signal = await FormingSignal(lastBuyPrice, balances);
-
             OCOOrder ocoOrder = await _stock.PostOrderOCOAsync(signal);
-            IEnumerable<Candlestick> candle = await _stock.GetCandlestickAsync(_symbol, _timeInterval, 1);
 
-            await Task.Delay(candle.Last().GetTimeSleepMilliseconds() + 3000);
+            await Task.Delay(5000);
 
             for (uint i = 0; i < uint.MaxValue; i++)
             {
@@ -120,7 +121,7 @@ namespace Strategy
                     }
                     else if (runningOrder.ListOrderStatus.Equals("ALL_DONE")) { break; }
 
-                    candle = await _stock.GetCandlestickAsync(_symbol, _timeInterval, 1);
+                    IEnumerable<Candlestick> candle = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 1);
                     await Task.Delay(candle.Last().GetTimeSleepMilliseconds() + 3000);
                 }
                 catch { Console.WriteLine("Ошибка в методе Sell"); await Task.Delay(1000); }
@@ -132,7 +133,7 @@ namespace Strategy
             {
                 try
                 {
-                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, _linearRegression.LongPeriod + 3);
+                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: _linearRegression.LongPeriod + 3);
                     List<decimal> prices = candles.Select(x => x.Close).ToList();
 
                     bool buySignalLR = _linearRegression.BuySignal(prices);
@@ -160,7 +161,7 @@ namespace Strategy
             Trade lastTrade = await _stock.GetLastTrade(_symbol);
             DateTime lastBuyTime = DateTimeOffset.FromUnixTimeMilliseconds(lastTrade.Time).LocalDateTime;
 
-            var candle = await _stock.GetCandlestickAsync(_symbol, _timeInterval, 1);
+            var candle = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 1);
             DateTime candleCloseTime = DateTimeOffset.FromUnixTimeMilliseconds(candle.FirstOrDefault().CloseTime).LocalDateTime;
 
             double quantityMinutes = (candleCloseTime - lastBuyTime).TotalMinutes;
@@ -172,12 +173,12 @@ namespace Strategy
             decimal kStop = 4.0m;
             decimal kHoldBars = 0.24m;
 
-            IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, 150);
+            IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 150);
 
             List<decimal> atr = _averageTrueRange.GetATR(candles.ToList());
             decimal holdBars = await GetHoldBars();
 
-            decimal priceStop = lastBuyPrice - atr.SkipLast(1).Last() * kStop + (holdBars * holdBars * kHoldBars);
+            decimal priceStop = ((lastBuyPrice - atr.SkipLast(1).Last() * kStop)) + (holdBars * holdBars * kHoldBars);
 
             return new Signal()
             {
