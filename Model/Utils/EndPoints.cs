@@ -15,6 +15,7 @@
         public static readonly string AllPrices = "/api/v1/ticker/allPrices";
         public static readonly string OrderBookTicker = "/api/v1/ticker/allBookTickers";
         public static readonly string ExchangeInfo = "/api/v3/exchangeInfo";
+        
         #endregion
 
         #region Account Endpoints
@@ -28,7 +29,7 @@
         public static readonly string AllOrders = "/api/v3/allOrders";
         public static readonly string AccountInformation = "/api/v3/account";
         public static readonly string TradeList = "/api/v3/myTrades";
-        public static readonly string DepositHistory = "/wapi/v1/getDepositHistory.html";
+        public static readonly string QueryOpenOCO = "/api/v3/openOrderList";
         #endregion
 
         #region Margin Account/Trade
