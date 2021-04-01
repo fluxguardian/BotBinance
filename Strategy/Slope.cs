@@ -50,7 +50,7 @@ namespace Strategy
             _asset = await _stock.GetExchangeInformationAsync(_symbol);
             _normalization = new Normalization(_asset);
 
-             List<Balance> balance = await _stock.GetBalance(_asset);
+            List<Balance> balance = await _stock.GetBalance(_asset);
 
             Console.WriteLine($"Баланс пользователя {_name}: {Math.Round(balance.First().Free, _normalization.Round.RoundPrice)} $");
 
@@ -99,10 +99,10 @@ namespace Strategy
             {
                 try
                 {
-                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 200);
+                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 120);
                     List<decimal> prices = candles.Select(x => x.Close).ToList();
 
-                    LinearRegressionCurve lr = _linearRegression.GetValuesCurve(prices, 195).SkipLast(1).Last();
+                    LinearRegressionCurve lr = _linearRegression.GetValuesCurve(prices, 21).SkipLast(1).Last();
                     decimal atr = _averageTrueRange.GetATR(candles.ToList()).SkipLast(1).Last();
 
                     var normalizeSlope = lr.Slope / atr;
@@ -118,7 +118,7 @@ namespace Strategy
                         });
                         break;
                     }
-                    else if(candles.SkipLast(1).Last().Close <= lastBuyPrice / 1.017m)
+                    else if(candles.SkipLast(1).Last().Close <= lastBuyPrice / 1.01m)
                     {
                         List<Balance> balance = await _stock.GetBalance(_asset);
                         await _stock.TakeMarketOrder(new Signal()
@@ -142,10 +142,10 @@ namespace Strategy
             {
                 try
                 {
-                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 200);
+                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 120);
                     List<decimal> prices = candles.Select(x => x.Close).ToList();
 
-                    LinearRegressionCurve lr = _linearRegression.GetValuesCurve(prices, 195).SkipLast(1).Last();
+                    LinearRegressionCurve lr = _linearRegression.GetValuesCurve(prices, 21).SkipLast(1).Last();
                     decimal atr = _averageTrueRange.GetATR(candles.ToList()).SkipLast(1).Last();
 
                     var normalizeSlope = lr.Slope / atr;
@@ -157,7 +157,7 @@ namespace Strategy
                         {
                             Symbol = _symbol,
                             Side = OrderSide.BUY,
-                            Quantity = _normalization.NormalizeBuy(balance.First().Free * 0.5m)
+                            Quantity = _normalization.NormalizeBuy(balance.First().Free)
                         });
                         break;
                     }
