@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TechnicalAnalysis.Oscillators;
 using TechnicalAnalysis.Trends;
 using TechnicalAnalysis.Volatility;
 
@@ -45,7 +44,7 @@ namespace Strategy
             Logic().Wait();
         }
 
-        private async Task Logic()
+        public async Task Logic()
         {
             _asset = await _stock.GetExchangeInformationAsync(_symbol);
             _normalization = new Normalization(_asset);
@@ -62,18 +61,18 @@ namespace Strategy
 
                     if (lastTrade.IsBuyer == false)
                     {
-                        Console.WriteLine($"{_name}: ожидаем вход в рынок {DateTime.Now}");
+                        Console.WriteLine($"{_name}: ожидаем вход в рынок {DateTime.Now.ToLocalTime()}");
 
                         await Buy();
-
                         await Task.Delay(10000);
+
+                        await WriteConsoleLastTrade();
                     }
                     else
                     {
-                        Console.WriteLine($"{_name}: ожидаем выход из рынка {DateTime.Now}");
+                        Console.WriteLine($"{_name}: ожидаем выход из рынка {DateTime.Now.ToLocalTime()}");
 
                         await Sell();
-
                         await Task.Delay(10000);
 
                         #region Баланс после продажи
@@ -82,16 +81,16 @@ namespace Strategy
 
                         Console.WriteLine($"Баланс пользователя {_name}: {Math.Round(balance.First().Free, _normalization.Round.RoundPrice)} $");
 
+                        await WriteConsoleLastTrade();
+
                         #endregion
                     }
-
-                    await Task.Delay((60 - DateTime.Now.Second) * 1000);
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); }
             }
         }
 
-        private async Task Sell()
+        public async Task Sell()
         {
             decimal lastBuyPrice = await _stock.GetLastBuyPriceAsync(_symbol);
 
@@ -135,8 +134,7 @@ namespace Strategy
                 catch (Exception e) { Console.WriteLine(e.Message); continue; }
             }
         }
-
-        private async Task Buy()
+        public async Task Buy()
         {
             for (uint i = 0; i < uint.MaxValue; i++)
             {
@@ -148,7 +146,7 @@ namespace Strategy
                     LinearRegressionCurve lr = _linearRegression.GetValuesCurve(prices, 21).SkipLast(1).Last();
                     decimal atr = _averageTrueRange.GetATR(candles.ToList()).SkipLast(1).Last();
 
-                    var normalizeSlope = lr.Slope / atr;
+                    decimal normalizeSlope = lr.Slope / atr;
 
                     if (normalizeSlope > 0)
                     {
@@ -165,6 +163,25 @@ namespace Strategy
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); continue; }
             }
+        }
+
+        private async Task WriteConsoleLastTrade()
+        {
+            Trade lastTrade = await _stock.GetLastTrade(_symbol);
+
+            Console.WriteLine("-----------------------------------------");
+
+            Console.WriteLine($"Пользователь: {_name}");
+
+            if (lastTrade.IsBuyer)
+            {
+                Console.WriteLine($"Цена покупки: {Math.Round(lastTrade.Price, _normalization.Round.RoundPrice)}");
+            }
+            else { Console.WriteLine($"Цена продажи: {Math.Round(lastTrade.Price, _normalization.Round.RoundPrice)}"); }
+
+            Console.WriteLine($"Комиссия: {lastTrade.Commission} {lastTrade.CommissionAsset}");
+
+            Console.WriteLine("-----------------------------------------");
         }
     }
 }
