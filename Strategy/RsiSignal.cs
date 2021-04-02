@@ -62,5 +62,20 @@ namespace Strategy
                 catch { Console.WriteLine($"Ошибка: {symbol}"); await Task.Delay(1500); continue; }
             }
         }
+
+        public Task Logic()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Sell()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Buy()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

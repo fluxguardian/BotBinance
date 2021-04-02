@@ -190,5 +190,20 @@ namespace Strategy
                 StopLimitPrice = Math.Round(priceStop, _normalization.Round.RoundPrice)
             };
         }
+
+        Task IStrategy.Logic()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IStrategy.Sell()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task IStrategy.Buy()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

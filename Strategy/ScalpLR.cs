@@ -198,5 +198,15 @@ namespace Strategy
             // Возмещаем бирже
             AccountRepay repaid = await _stock.RepayQuoteAsset(_asset.QuoteAsset);
         }
+
+        public Task Sell()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Buy()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
