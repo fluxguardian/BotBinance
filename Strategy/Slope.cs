@@ -150,6 +150,7 @@ namespace Strategy
 
                             break;
                         }
+                        else { break; }
                     }
 
                     IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 1);
