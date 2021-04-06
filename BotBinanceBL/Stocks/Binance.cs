@@ -71,7 +71,6 @@ namespace BotBinanceBL.Stocks
 
             return repay.FirstOrDefault().Borrowed;
         }
-
         public async Task<AccountRepay> RepayQuoteAsset(string asset)
         {
             decimal amountRepay = await GetAmountRepay(asset);
@@ -242,6 +241,41 @@ namespace BotBinanceBL.Stocks
             }
             catch { throw new Exception($"Ошибка в методе PostOrderOCOAsync ({DateTime.Now})"); }
         }
+        public async Task<NewOrder> TakeOrderStopLossLimit(Signal signal)
+        {
+            try
+            {
+                return await _binanceRequest.OrderStopLossLimit(signal.Symbol, signal.Quantity, signal.StopLimitPrice, signal.StopLoss, signal.Side);
+            }
+            catch { throw new Exception($"Ошибка в методе TakeOrderStopLoss ({DateTime.Now})"); }
+
+        }
+        public async Task<CanceledOrder> CancelLimitOrder(Order order)
+        {
+            try
+            {
+                return await _binanceRequest.CancelOrder(order.Symbol, order.OrderId);
+            }
+            catch { throw new Exception($"Ошибка в методе CancelLimitOrder ({DateTime.Now})"); }
+        }
+
+        public async Task<Order> GetLimitOrder(NewOrder order)
+        {
+            try
+            {
+                return await _binanceRequest.GetOrder(order.Symbol, order.OrderId, order.ClientOrderId);
+            }
+            catch { throw new Exception($"Ошибка в методе GetLimitOrder ({DateTime.Now})"); }
+        }
+
+        public async Task<IEnumerable<Order>> GetCurrentOpenOrders(string symbol)
+        {
+            try
+            {
+                return await _binanceRequest.GetCurrentOpenOrders(symbol);
+            }
+            catch { throw new Exception($"Ошибка в методе GetCurrentOpenOrders ({DateTime.Now})"); }
+        }
         public async Task<List<QueryOrder>> GetOpenOCO(string symbol)
         {
             try
@@ -335,8 +369,6 @@ namespace BotBinanceBL.Stocks
             signal.Price += 0.2m;
             signal.StopLoss += 0.2m;
             signal.StopLimitPrice += 0.2m;
-        }
-
-        
+        }  
     }
 }
