@@ -123,10 +123,7 @@ namespace Strategy
                     StopLoss = Math.Round(lastBuyPrice / 1.005m, _normalization.Round.RoundPrice),
                     StopLimitPrice = Math.Round(lastBuyPrice / 1.006m, _normalization.Round.RoundPrice),
                 });
-
-                Console.WriteLine("StopLossLimitOrder выставлен");
             }
-            else { Console.WriteLine("StopLossLimitOrder уже был выставлен"); }
 
             for (uint i = 0; i < uint.MaxValue; i++)
             {
@@ -136,14 +133,11 @@ namespace Strategy
 
                     if (normalizeSlope < 0)
                     {
-                        Console.WriteLine("Slope меньше 0");
-
                         opensLimitOrders = await _stock.GetCurrentOpenOrders(_symbol);
 
                         if (opensLimitOrders.Any())
                         {
                             CanceledOrder canceledOrder = await _stock.CancelLimitOrder(opensLimitOrders.First());
-                            Console.WriteLine("StopLossLimitOrder отменен");
 
                             await Task.Delay(3000);
 
