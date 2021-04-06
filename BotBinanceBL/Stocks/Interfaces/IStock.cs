@@ -14,8 +14,12 @@ namespace BotBinanceBL.Stocks.Interfaces
     {
         Task<List<Balance>> GetBalance(Symbol asset);
         Task<Trade> GetLastTrade(string symbol);
+        Task<CanceledOrder> CancelLimitOrder(Order order);
+        Task<Order> GetLimitOrder(NewOrder order);
         Task<OCOOrder> PostOrderOCOAsync(Signal signal);
         Task<NewOrder> TakeMarketOrder(Signal signal);
+        Task<NewOrder> TakeOrderStopLossLimit(Signal signal);
+        Task<IEnumerable<Order>> GetCurrentOpenOrders(string symbol);
         Task<QueryOCO> GetOcoOrderAsync(OCOOrder order);
         Task<QueryOCO> CanceledOrderAsync(string symbol, OCOOrder order);
         Task<AccountInfo> GetAccountInformation();
