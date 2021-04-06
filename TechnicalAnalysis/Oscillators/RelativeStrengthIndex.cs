@@ -4,14 +4,20 @@ using System.Linq;
 
 namespace TechnicalAnalysis.Oscillators
 {
-    public static class RelativeStrengthIndex
+    public class RelativeStrengthIndex
     {
-        public static List<decimal> GetRSI(List<decimal> prices, int period = 14)
+        public int Period { get; set; }
+        public RelativeStrengthIndex(int period)
+        {
+            Period = period;
+        }
+
+        public List<decimal> GetRSI(List<decimal> prices)
         {
             List<decimal> up = new List<decimal>();
             List<decimal> down = new List<decimal>();
 
-            for (int i = 0; i < prices.Take(period).Count(); i++)
+            for (int i = 0; i < prices.Take(Period).Count(); i++)
             {
                 if (prices[i + 1] - prices[i] < 0)
                 {
@@ -23,8 +29,8 @@ namespace TechnicalAnalysis.Oscillators
                 }
             }
 
-            decimal avrLoss = down.Sum() / Convert.ToDecimal(period);
-            decimal avrGain = up.Sum() / Convert.ToDecimal(period);
+            decimal avrLoss = down.Sum() / Convert.ToDecimal(Period);
+            decimal avrGain = up.Sum() / Convert.ToDecimal(Period);
 
             decimal nextAvgGain = 0.0m;
             decimal nextAvgLoss = 0.0m;
@@ -34,7 +40,7 @@ namespace TechnicalAnalysis.Oscillators
 
             List<decimal> rsiLst = new List<decimal>();
 
-            for (int j = period; j < prices.Count - 1; j++)
+            for (int j = Period; j < prices.Count - 1; j++)
             {
                 if (prices[j + 1] - prices[j] > 0)
                 {
@@ -45,8 +51,8 @@ namespace TechnicalAnalysis.Oscillators
                     currentLoss = (prices[j + 1] - prices[j]) * -1;
                 }
 
-                nextAvgGain = ((avrGain * Convert.ToDecimal(period - 1)) + currentGain) / Convert.ToDecimal(period);
-                nextAvgLoss = ((avrLoss * Convert.ToDecimal(period - 1)) + currentLoss) / Convert.ToDecimal(period);
+                nextAvgGain = ((avrGain * Convert.ToDecimal(Period - 1)) + currentGain) / Convert.ToDecimal(Period);
+                nextAvgLoss = ((avrLoss * Convert.ToDecimal(Period - 1)) + currentLoss) / Convert.ToDecimal(Period);
 
                 avrGain = nextAvgGain;
                 avrLoss = nextAvgLoss;
