@@ -5,27 +5,41 @@ using Trends.TechnicalAnalysis;
 
 namespace TechnicalAnalysis.Oscillators
 {
-    public static class StochasticRSI
+    public class StochasticRSI
     {
-        public static StochasticRSIValues GetStochasticRSI(IEnumerable<Candlestick> candlesticks, 
-            int periodRSI = 14, int periodStoch = 14, int smoothK = 3, int smoothD = 3)
+        public int Period { get; set; }
+        public int PeriodStoch { get; set; }
+        public int SmoothK { get; set; }
+        public int SmoothD { get; set; }
+        private RelativeStrengthIndex _rsi { get; set; }
+        public StochasticRSI(int period, int periodStoch, int smoothK, int smoothD)
+        {
+            Period = period;
+            PeriodStoch = periodStoch;
+            SmoothK = smoothK;
+            SmoothD = smoothD;
+
+            _rsi = new RelativeStrengthIndex(Period);
+        }
+
+        public StochasticRSIValues GetStochasticRSI(IEnumerable<Candlestick> candlesticks)
         {
             decimal max = 0.0m;
             decimal min = 0.0m;
 
-            List<decimal> rsi = RelativeStrengthIndex.GetRSI(candlesticks.Select(p => p.Close).ToList(), periodRSI);
+            List<decimal> rsi = _rsi.GetRSI(candlesticks.Select(p => p.Close).ToList());
             List<decimal> stochasticRSI = new List<decimal>();
 
-            for (int i = periodStoch; i < rsi.Count + 1; i++)
+            for (int i = PeriodStoch; i < rsi.Count + 1; i++)
             {
-                max = rsi.Skip(i - periodStoch).Take(periodStoch).Max();
-                min = rsi.Skip(i - periodStoch).Take(periodStoch).Min();
+                max = rsi.Skip(i - PeriodStoch).Take(PeriodStoch).Max();
+                min = rsi.Skip(i - PeriodStoch).Take(PeriodStoch).Min();
 
                 stochasticRSI.Add((rsi[i - 1] - min) / (max - min) * 100);
             }
 
-            List<decimal> smoothedK = SimpleMovingAverage.GetSimpleMovingAverages(stochasticRSI, smoothK);
-            List<decimal> smoothedD = SimpleMovingAverage.GetSimpleMovingAverages(smoothedK, smoothD);
+            List<decimal> smoothedK = SimpleMovingAverage.GetSimpleMovingAverages(stochasticRSI, SmoothK);
+            List<decimal> smoothedD = SimpleMovingAverage.GetSimpleMovingAverages(smoothedK, SmoothD);
 
             return new StochasticRSIValues()
             {
