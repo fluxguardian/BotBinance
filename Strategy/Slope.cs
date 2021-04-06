@@ -126,6 +126,7 @@ namespace Strategy
 
                 Console.WriteLine("StopLossLimitOrder выставлен");
             }
+            else { Console.WriteLine("StopLossLimitOrder уже был выставлен"); }
 
             for (uint i = 0; i < uint.MaxValue; i++)
             {
