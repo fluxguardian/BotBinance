@@ -7,7 +7,5 @@ namespace BotBinanceBL.Interfaces
     {
         public void Trade(IStock stock);
         Task Logic();
-        Task Sell();
-        Task Buy();
     }
 }
