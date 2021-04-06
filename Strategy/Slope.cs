@@ -69,7 +69,7 @@ namespace Strategy
                         Console.WriteLine($"{_name}: ожидаем вход в рынок {DateTime.Now.ToLocalTime()}");
 
                         await Buy();
-                        await Task.Delay(5000);
+                        await Task.Delay(10000);
 
                         await WriteConsoleLastTrade();
                     }
@@ -78,7 +78,7 @@ namespace Strategy
                         Console.WriteLine($"{_name}: ожидаем выход из рынка {DateTime.Now.ToLocalTime()}");
 
                         await Sell();
-                        await Task.Delay(5000);
+                        await Task.Delay(10000);
 
                         #region Баланс после продажи
 
@@ -143,11 +143,6 @@ namespace Strategy
 
                             await MarketSell();
 
-                            break;
-                        }
-                        else 
-                        {
-                            await MarketSell();
                             break;
                         }
                     }
