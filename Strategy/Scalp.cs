@@ -195,15 +195,5 @@ namespace Strategy
         {
             throw new NotImplementedException();
         }
-
-        Task IStrategy.Sell()
-        {
-            throw new NotImplementedException();
-        }
-
-        Task IStrategy.Buy()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
