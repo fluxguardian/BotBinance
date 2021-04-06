@@ -32,12 +32,16 @@ namespace BotBinanceBL.Requests
 
             if (response.IsSuccessStatusCode)
             {
-              
-                response.EnsureSuccessStatusCode();
+                try
+                {
+                    response.EnsureSuccessStatusCode();
 
-                string result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    string result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                return JsonConvert.DeserializeObject<T>(result);
+                    return JsonConvert.DeserializeObject<T>(result);
+                }
+                catch (Exception e) { Console.WriteLine(e.Message); }
+                
             }
 
             if (response.StatusCode == HttpStatusCode.GatewayTimeout)
@@ -247,22 +251,18 @@ namespace BotBinanceBL.Requests
             return await CallAsync<List<OpenOCOOrder>>(ApiMethod.GET, EndPoints.QueryOpenOCO, true, "recvWindow=5000");
         }
 
-        public async Task<CanceledOrder> CancelOrder(string symbol, long? orderId = null, string origClientOrderId = null, long recvWindow = 5000)
+        public async Task<CanceledOrder> CancelOrder(string symbol, long? orderId = null)
         {
             if (string.IsNullOrWhiteSpace(symbol))
             {
                 throw new ArgumentException("symbol cannot be empty. ", "symbol");
             }
 
-            var args = $"symbol={symbol.ToUpper()}&recvWindow={recvWindow}";
+            var args = $"symbol={symbol}&recvWindow=5000";
 
             if (orderId.HasValue)
             {
                 args += $"&orderId={orderId.Value}";
-            }
-            else if (string.IsNullOrWhiteSpace(origClientOrderId))
-            {
-                args += $"&origClientOrderId={origClientOrderId}";
             }
             else
             {
@@ -271,9 +271,9 @@ namespace BotBinanceBL.Requests
 
             return await CallAsync<CanceledOrder>(ApiMethod.DELETE, EndPoints.CancelOrder, true, args);
         }
-        public async Task<Order> GetOrder(string symbol, long? orderId = null, string origClientOrderId = null, long recvWindow = 5000)
+        public async Task<Order> GetOrder(string symbol, long? orderId = null, string origClientOrderId = null)
         {
-            var args = $"symbol={symbol.ToUpper()}&recvWindow={recvWindow}";
+            var args = $"symbol={symbol.ToUpper()}&recvWindow=5000";
 
             if (string.IsNullOrWhiteSpace(symbol))
             {
@@ -298,13 +298,23 @@ namespace BotBinanceBL.Requests
         public async Task<NewOrder> PostNewOrder(string symbol, decimal quantity, decimal price, OrderSide side, OrderType orderType,
             TimeInForce timeInForce, decimal icebergQty = 0, long recvWindow = 5000)
         {
-            string newPrice = price.ToString();
-            newPrice = newPrice.Replace(',', '.');
+            string param = $"symbol={symbol}" +
+                $"&side={side}&type={orderType}" +
+                $"&timeInForce={timeInForce}" +
+                $"&recvWindow=5000&quantity={quantity.ToString(CultureInfo.InvariantCulture)}" +
+                $"&price={price.ToString(CultureInfo.InvariantCulture)}";
 
-            string newQuantity = quantity.ToString();
-            newQuantity = newQuantity.Replace(',', '.');
-
-            string param = $"symbol={symbol}&side={side}&type={orderType}&timeInForce={timeInForce}&recvWindow=5000&quantity={newQuantity}&price={newPrice}";
+            return await CallAsync<NewOrder>(ApiMethod.POST, EndPoints.NewOrder, true, param);
+        }
+        public async Task<NewOrder> OrderStopLossLimit(string symbol, decimal quantity, decimal stopLimitPrice, decimal stopPrice, OrderSide side)
+        {
+            string param = $"symbol={symbol}" +
+                $"&side={side}" +
+                $"&type={OrderType.STOP_LOSS_LIMIT}" +
+                $"&timeInForce={TimeInForce.GTC}" +
+                $"&price={stopLimitPrice.ToString(CultureInfo.InvariantCulture)}" +
+                $"&quantity={quantity.ToString(CultureInfo.InvariantCulture)}" +
+                $"&stopPrice={stopPrice.ToString(CultureInfo.InvariantCulture)}";
 
             return await CallAsync<NewOrder>(ApiMethod.POST, EndPoints.NewOrder, true, param);
         }
@@ -336,14 +346,14 @@ namespace BotBinanceBL.Requests
             return await CallAsync<IEnumerable<Order>>(ApiMethod.GET, EndPoints.AllOrders, true,
                 $"symbol={symbol}&limit={limit}&recvWindow={recvWindow}" + (orderId.HasValue ? $"&orderId={orderId.Value}" : ""));
         }
-        public async Task<IEnumerable<Order>> GetCurrentOpenOrders(string symbol, long recvWindow = 5000)
+        public async Task<IEnumerable<Order>> GetCurrentOpenOrders(string symbol)
         {
             if (string.IsNullOrWhiteSpace(symbol))
             {
                 throw new ArgumentException("symbol cannot be empty. ", "symbol");
             }
 
-            return await CallAsync<IEnumerable<Order>>(ApiMethod.GET, EndPoints.CurrentOpenOrders, true, $"symbol={symbol}&recvWindow={recvWindow}");
+            return await CallAsync<IEnumerable<Order>>(ApiMethod.GET, EndPoints.CurrentOpenOrders, true, $"symbol={symbol}&recvWindow=5000");
         }
         public async Task<IEnumerable<Candlestick>> GetCandleSticks(string symbol, TimeInterval interval, DateTime? startTime = null, DateTime? endTime = null, int limit = 500)
         {
@@ -378,7 +388,7 @@ namespace BotBinanceBL.Requests
         {
             return await CallAsync<TradingRules>(ApiMethod.GET, EndPoints.ExchangeInfo);
         }
-
+   
         #endregion
     }
 }
