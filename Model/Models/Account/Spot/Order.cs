@@ -26,6 +26,8 @@ namespace Model.Models.Account.Spot
         public string Side { get; set; }
         [JsonProperty("stopPrice")]
         public decimal StopPrice { get; set; }
+        [JsonProperty("isWorking")]
+        public bool IsWorking { get; set; }
         [JsonProperty("icebergQty")]
         public decimal IcebergQty { get; set; }
         [JsonProperty("time")]
