@@ -18,7 +18,7 @@ namespace BotBinance
 
             Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
 
-            clientKirill.AddStrategy(new Slope("Kirill", "ETHUSDT", TimeInterval.Minutes_5));
+            clientKirill.AddStrategy(new RsiSlope("Kirill", "ETHUSDT", TimeInterval.Minutes_5));
             clientKirill.StartStrategies();
 
             Console.ReadKey();
