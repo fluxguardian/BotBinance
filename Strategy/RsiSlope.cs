@@ -66,7 +66,7 @@ namespace Strategy
                         Console.WriteLine($"{_name}: ожидаем вход в рынок {DateTime.Now.ToLocalTime()}");
 
                         await Buy();
-                        await Task.Delay(10000);
+                        await Task.Delay(5000);
 
                         await WriteConsoleLastTrade();
                     }
@@ -75,7 +75,7 @@ namespace Strategy
                         Console.WriteLine($"{_name}: ожидаем выход из рынка {DateTime.Now.ToLocalTime()}");
 
                         await Sell();
-                        await Task.Delay(10000);
+                        await Task.Delay(5000);
 
                         #region Баланс после продажи
 
@@ -103,6 +103,20 @@ namespace Strategy
             decimal lastBuyPrice = await _stock.GetLastBuyPriceAsync(_symbol);
             List<Balance> balances = await _stock.GetBalance(_asset);
 
+            IEnumerable<Order> opensLimitOrders = await _stock.GetCurrentOpenOrders(_symbol);
+
+            if (!opensLimitOrders.Any())
+            {
+                await _stock.TakeOrderStopLossLimit(new Signal()
+                {
+                    Symbol = _symbol,
+                    Side = OrderSide.SELL,
+                    Quantity = _normalization.NormalizeSell(balances.Last().Free),
+                    StopLoss = Math.Round(lastBuyPrice / 1.0015m, _normalization.Round.RoundPrice),
+                    StopLimitPrice = Math.Round(lastBuyPrice / 1.002m, _normalization.Round.RoundPrice),
+                });
+            }
+
             for (uint i = 0; i < uint.MaxValue; i++)
             {
                 try
@@ -114,15 +128,18 @@ namespace Strategy
 
                     if (rsi > 65 && prices.SkipLast(1).Last() >= lastBuyPrice * 1.003m)
                     {
-                        await MarketSell();
+                        opensLimitOrders = await _stock.GetCurrentOpenOrders(_symbol);
+                        if (opensLimitOrders.Any())
+                        {
+                            CanceledOrder canceledOrder = await _stock.CancelLimitOrder(opensLimitOrders.First());
 
-                        break;
-                    }
-                    else if(prices.SkipLast(1).Last() <= lastBuyPrice / 1.0015m)
-                    {
-                        await MarketSell();
+                            await Task.Delay(3000);
 
-                        break;
+                            await MarketSell();
+
+                            break;
+                        }
+                        else { break; }
                     }
 
                     await Task.Delay(candles.Last().GetTimeSleepMilliseconds() + 3000);
