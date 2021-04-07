@@ -121,15 +121,15 @@ namespace Strategy
             {
                 try
                 {
-                    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: _rsi.Period * 8);
-                    List<decimal> prices = candles.Select(x => x.Close).ToList();
-
-                    decimal rsi = _rsi.GetRSI(prices).SkipLast(1).Last();
-
-                    if (rsi > 65 && prices.SkipLast(1).Last() >= lastBuyPrice * 1.003m)
+                    opensLimitOrders = await _stock.GetCurrentOpenOrders(_symbol);
+                    if (opensLimitOrders.Any())
                     {
-                        opensLimitOrders = await _stock.GetCurrentOpenOrders(_symbol);
-                        if (opensLimitOrders.Any())
+                        IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: _rsi.Period * 8);
+                        List<decimal> prices = candles.Select(x => x.Close).ToList();
+
+                        decimal rsi = _rsi.GetRSI(prices).SkipLast(1).Last();
+
+                        if (rsi > 65 && prices.SkipLast(1).Last() >= lastBuyPrice * 1.003m)
                         {
                             CanceledOrder canceledOrder = await _stock.CancelLimitOrder(opensLimitOrders.First());
 
@@ -138,11 +138,12 @@ namespace Strategy
                             await MarketSell();
 
                             break;
-                        }
-                        else { break; }
+                        }                     
                     }
+                    else { break; }
 
-                    await Task.Delay(candles.Last().GetTimeSleepMilliseconds() + 3000);
+                    IEnumerable<Candlestick> candle = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 1);
+                    await Task.Delay(candle.Last().GetTimeSleepMilliseconds() + 3000);
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); }
             }
