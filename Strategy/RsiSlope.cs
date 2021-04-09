@@ -85,11 +85,28 @@ namespace Strategy
 
                         await WriteConsoleLastTrade();
 
+                        await WaitConditionToBuy();
+
                         #endregion
                     }
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); }
             }
+        }
+
+        private async Task WaitConditionToBuy()
+        {
+            for (uint i = 0; i < uint.MaxValue; i++)
+            {
+                List<decimal> slopes = await GetTwoLastNormalizeLrSlope(6);
+                if(slopes.First() > 0 && slopes.Last() < 0)
+                {
+                    break;
+                }
+
+                IEnumerable<Candlestick> candle = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: 1);
+                await Task.Delay(candle.Last().GetTimeSleepMilliseconds() + 3000);
+            }         
         }
 
         public async Task Init()
@@ -181,6 +198,24 @@ namespace Strategy
             decimal atr = _averageTrueRange.GetATR(candles.ToList()).SkipLast(1).Last();
 
             return slopeLr / atr;
+        }
+
+        private async Task<List<decimal>> GetTwoLastNormalizeLrSlope(int periodLr)
+        {
+            IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(_symbol, _timeInterval, quantity: _averageTrueRange.Period * 6);
+            List<decimal> prices = candles.Select(x => x.Close).SkipLast(1).ToList();
+
+            List<decimal> rsi = _rsi.GetRSI(prices);
+
+            List<LinearRegressionCurve> slopeLr = _linearRegression.GetValuesCurve(rsi, periodLr);
+            List<decimal> atr = _averageTrueRange.GetATR(candles.SkipLast(1).ToList());
+
+            List<decimal> lst = new List<decimal>();
+        
+            lst.Add(slopeLr.SkipLast(1).Last().Slope / atr.SkipLast(1).Last());
+            lst.Add(slopeLr.Last().Slope / atr.Last());
+
+            return lst;
         }
 
         private async Task MarketSell()
