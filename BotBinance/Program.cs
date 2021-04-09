@@ -16,10 +16,10 @@ namespace BotBinance
             client.AddStrategy(new RsiSlope("flaxmine", "ETHUSDT", TimeInterval.Minutes_5));
             client.StartStrategies();
 
-            Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
+            //Client clientKirill = new Client(new Binance(Settings.KirillKey, Settings.KirillSecretKey));
 
-            clientKirill.AddStrategy(new RsiSlope("Kirill", "ETHUSDT", TimeInterval.Minutes_5));
-            clientKirill.StartStrategies();
+            //clientKirill.AddStrategy(new RsiSlope("Kirill", "ETHUSDT", TimeInterval.Minutes_5));
+            //clientKirill.StartStrategies();
 
             Console.ReadKey();
         }
