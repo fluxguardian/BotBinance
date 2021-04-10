@@ -129,8 +129,8 @@ namespace Strategy
                     Symbol = _symbol,
                     Side = OrderSide.SELL,
                     Quantity = _normalization.NormalizeSell(balances.Last().Free),
-                    StopLoss = Math.Round(lastBuyPrice / 1.0015m, _normalization.Round.RoundPrice),
-                    StopLimitPrice = Math.Round(lastBuyPrice / 1.002m, _normalization.Round.RoundPrice),
+                    StopLoss = Math.Round(lastBuyPrice / 1.003m, _normalization.Round.RoundPrice),
+                    StopLimitPrice = Math.Round(lastBuyPrice / 1.0035m, _normalization.Round.RoundPrice),
                 });
             }
 
