@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "BotBinance": {
-      "commandName": "Project",
-      "remoteDebugEnabled": false
-    }
-  }
-}

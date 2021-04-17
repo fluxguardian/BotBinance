@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BotBinanceBL\BotBinanceBL.csproj" />
+    <ProjectReference Include="..\Csv\Csv.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
     <ProjectReference Include="..\TechnicalAnalysis\TechnicalAnalysis.csproj" />
   </ItemGroup>
