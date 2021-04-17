@@ -10,4 +10,10 @@
     <ProjectReference Include="..\TechnicalAnalysis\TechnicalAnalysis.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Data\DataLastStrategy\DataOfIndicators.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Model.Models.Market;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using TechnicalAnalysis.Interfaces;
 
 namespace TechnicalAnalysis.Trends
 {
-    public class LinearRegression
+    public class LinearRegression : IIndicator
     {
         public int ShortPeriod { get; set; }
         public int LongPeriod { get; set; }
@@ -126,6 +128,38 @@ namespace TechnicalAnalysis.Trends
             {
                 return true;
             }
+            return false;
+        }
+
+        public bool IsBuy(List<Candlestick> candlesticks)
+        {
+            return false;
+        }
+        public bool IsSell(List<Candlestick> candlesticks)
+        {
+            return false;
+        }
+
+        public bool IsBuy(List<Candlestick> candlesticks, decimal value, params int[] periods)
+        {
+            LinearRegressionCurve lr = GetValueCurve(candlesticks.Select(x => x.Close).ToList(), periods.First());
+
+            if (lr.Slope < value)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        public bool IsSell(List<Candlestick> candlesticks, decimal value, params int[] periods)
+        {
+            LinearRegressionCurve lr = GetValueCurve(candlesticks.Select(x => x.Close).ToList(), periods.First());
+
+            if (lr.Slope > value)
+            {
+                return true;
+            }
+
             return false;
         }
     }

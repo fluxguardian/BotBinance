@@ -27,7 +27,7 @@ namespace Strategy
         private decimal BorrowedQuoteAsset { get; set; }
         private decimal BorrowedBaseAsset { get; set; }
 
-        public ScalpLR(string symbol, TimeInterval timeInterval, string name)
+        public ScalpLR(string name, string symbol, TimeInterval timeInterval)
         {
             _symbol = symbol;
             _timeInterval = timeInterval;
@@ -42,8 +42,6 @@ namespace Strategy
 
             _asset = _stock.GetExchangeInformationAsync(_symbol).Result;
             _normalization = new Normalization(_asset);
-
-            LongExitPosition().Wait();
 
             Logic().Wait();
         }
