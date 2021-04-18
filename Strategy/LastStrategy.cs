@@ -1,30 +1,36 @@
 ﻿using BotBinanceBL.Interfaces;
 using BotBinanceBL.Stocks.Interfaces;
 using Model.Enums;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using TechnicalAnalysis.Interfaces;
 using System.Linq;
-using System.Globalization;
-using Csv;
+using Model.Models.Market;
+using TechnicalAnalysis.Oscillators;
+using Strategy.Data.DataLastStrategy;
+using TechnicalAnalysis.Trends;
+using System;
+using Model.Utils;
 
 namespace Strategy
 {
     public class LastStrategy : IStrategy
     {
-        private List<IIndicator> indicators { get; set; }
         private TimeInterval _timeInterval { get; set; }
         private IStock _stock { get; set; }
+        private List<DataStrategy> DataStrategies { get; set; }
+        private TrueStrengthIndex trueStrengthIndex { get; set; }
+        private RelativeStrengthIndex relativeStrengthIndex { get; set; }
+        private LinearRegression linearRegression { get; set; }
 
-        private static string appPapth => Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
-
-        public LastStrategy(List<IIndicator> indicators, TimeInterval timeInterval)
+        public LastStrategy(List<DataStrategy> dataStrategies, TimeInterval timeInterval)
         {
-            this.indicators = indicators;
             _timeInterval = timeInterval;
+
+            trueStrengthIndex = new TrueStrengthIndex();
+            relativeStrengthIndex = new RelativeStrengthIndex();
+            linearRegression = new LinearRegression();
+
+            DataStrategies = dataStrategies;
         }
         public void Trade(IStock stock)
         {
@@ -35,26 +41,96 @@ namespace Strategy
 
         public async Task Logic()
         {
-            var res = ReadCsv(appPapth + @"\Data\DataLastStrategy\DataOfIndicators.csv");
+            List<string> symbols = DataStrategies.Select(x => x.Symbol).ToList();
 
-            Console.WriteLine(res.First().LrSlope);
-            Console.WriteLine(res.First().ProfitLong.ToString(CultureInfo.InvariantCulture));
+            for (uint i = 0; i < uint.MaxValue; i++)
+            {
+                Dictionary<string, string> result = await WaitSignal(symbols);
+
+                if (result.Any())
+                {
+                    if (result.First().Value == "Long")
+                    {
+
+                    }
+                    else if (result.First().Value == "Short") { }
+                }
+
+                await WaitNextCandle();
+            }
+
+            Console.WriteLine();
         }
 
-        private List<DataStrategy> ReadCsv(string path)
+        private async Task<Dictionary<string, string>> WaitSignal(List<string> symbols)
         {
+            var tasks = new Task<Dictionary<string, string>>[symbols.Count];
+            Task<Dictionary<string, string>[]> allTasks = null;
 
-            //List<DataStrategy> result = File.ReadAllLines(path).Skip(1)
-            //    .Select(line => line.Split(';'))
-            //    .Select(x => new DataStrategy()
-            //    {
-            //        LrSlope = Convert.ToDecimal(x[0]),
-            //        ProfitLong = Convert.ToDecimal(x[1].Replace('.', ','))
-            //    }).ToList();
+            int i = 0;
 
-            var result = CSV.ReadCsv(path);
+            try
+            {
+                foreach (string symbol in symbols)
+                {
+                    tasks[i] = Task.Run(() => CheckBuyOrSell(symbol));
+                    i++;
+                }
 
-            return result;
+                allTasks = Task.WhenAll(tasks);
+                await allTasks;
+
+                return allTasks.Result.Where(x => x != null).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Исключение: " + ex.Message);
+                Console.WriteLine("IsFaulted: " + allTasks.IsFaulted);
+                foreach (var inx in allTasks.Exception.InnerExceptions)
+                {
+                    Console.WriteLine("Внутреннее исключение: " + inx.Message);
+                }
+
+                return null;
+            }
+        }
+
+        private Dictionary<string, string> CheckBuyOrSell(string symbol)
+        {
+            List<Candlestick> candles = _stock.GetCandlestickAsync(symbol, _timeInterval, quantity: 150).Result.SkipLast(1).ToList();
+
+            DataStrategy parametres = DataStrategies.Where(x => x.Symbol.Equals(symbol)).FirstOrDefault();
+
+            List<bool> longs = new List<bool>()
+            {
+                trueStrengthIndex.IsBuy(candles, parametres.TSIValueLong / 100.0m, parametres.TSIFirstR, parametres.TSISecondS),
+                relativeStrengthIndex.IsBuy(candles, parametres.RsiValueLong, parametres.RSI),
+                linearRegression.IsBuy(candles, parametres.SlopeValueLong, parametres.LrSlope)
+            };
+
+            List<bool> shorts = new List<bool>()
+            {
+                trueStrengthIndex.IsSell(candles, parametres.TSIValueLong / 100.0m, parametres.TSIFirstR, parametres.TSISecondS),
+                relativeStrengthIndex.IsSell(candles, parametres.RsiValueLong, parametres.RSI),
+                linearRegression.IsSell(candles, parametres.SlopeValueLong, parametres.LrSlope)
+            };
+
+            if (!longs.Any(x => x == false))
+            {
+                return new Dictionary<string, string>() { { symbol, "Long" } };
+            }
+            else if(!shorts.Any(x => x == false))
+            {
+                return new Dictionary<string, string>() { { symbol, "Short" } };
+            }
+
+            return null;
+        }
+
+        private async Task WaitNextCandle()
+        {
+            var candlesLast = await _stock.GetCandlestickAsync("BTCUSDT", _timeInterval, quantity: 1);
+            await Task.Delay(candlesLast.Last().GetTimeSleepMilliseconds() + 2000);
         }
     } 
 }
