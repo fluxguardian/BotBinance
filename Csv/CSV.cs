@@ -1,16 +1,16 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Csv
 {
-    public static class CSV
+    public static class CSV<T> where T : class
     {
-        public static List<DataStrategy> ReadCsv(string path)
+        public static List<T> ReadCsv(string path)
         {
             CsvConfiguration configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -22,7 +22,7 @@ namespace Csv
             {
                 using (CsvReader csvReader = new CsvReader(streamReader, configuration))
                 {
-                    return csvReader.GetRecords<DataStrategy>().ToList();
+                    return csvReader.GetRecords<T>().ToList();
                 }
             }
         }

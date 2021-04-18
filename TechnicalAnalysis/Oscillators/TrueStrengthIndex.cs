@@ -2,18 +2,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TechnicalAnalysis.Interfaces;
 using Trends.TechnicalAnalysis;
 
 namespace TechnicalAnalysis.Oscillators
 {
-    public class TrueStrengthIndex : ISignal, IIndicator
+    public class TrueStrengthIndex : ISignal
     {
         private int _quantityCandles { get; set; }
         private int _periodTSI { get; set; }
         private int _periodSignalLine { get; set; }
         private decimal _valueBuy { get; set; }
         private decimal _valueSell { get; set; }
+        public int[] periods { get; set; }
 
         public TrueStrengthIndex(int quantityCandles, int periodTSI, int periodSignalLine, decimal valueBuy, decimal valueSell)
         {
@@ -154,9 +154,9 @@ namespace TechnicalAnalysis.Oscillators
 
         public bool IsBuy(List<Candlestick> candlesticks, decimal value, params int[] periods)
         {
-            TSIValues tsi = GetTSI(candlesticks.Select(x => x.Close).ToList(), periods[0], periods[1], periods[2]);
+            TSIValues tsi = GetTSI(candlesticks.Select(x => x.Close).ToList(), periods[0], periods[1], 10);
 
-            if (tsi.TSI.Last() < value)
+            if (tsi.TSI.Last() < -value)
             {
                 return true;
             }
@@ -165,7 +165,7 @@ namespace TechnicalAnalysis.Oscillators
         }
         public bool IsSell(List<Candlestick> candlesticks, decimal value, params int[] periods)
         {
-            TSIValues tsi = GetTSI(candlesticks.Select(x => x.Close).ToList(), periods[0], periods[1], periods[2]);
+            TSIValues tsi = GetTSI(candlesticks.Select(x => x.Close).ToList(), periods[0], periods[1], 10);
 
             if (tsi.TSI.Last() > value)
             {

@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TechnicalAnalysis.Interfaces;
 
 namespace TechnicalAnalysis.Oscillators
 {
-    public class RelativeStrengthIndex : IIndicator
+    public class RelativeStrengthIndex
     {
         public int Period { get; set; }
         private decimal _valueBuy { get; set; }

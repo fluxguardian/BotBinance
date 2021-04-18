@@ -2,11 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TechnicalAnalysis.Interfaces;
 
 namespace TechnicalAnalysis.Trends
 {
-    public class LinearRegression : IIndicator
+    public class LinearRegression
     {
         public int ShortPeriod { get; set; }
         public int LongPeriod { get; set; }
@@ -144,7 +143,7 @@ namespace TechnicalAnalysis.Trends
         {
             LinearRegressionCurve lr = GetValueCurve(candlesticks.Select(x => x.Close).ToList(), periods.First());
 
-            if (lr.Slope < value)
+            if (lr.Slope < -value)
             {
                 return true;
             }

@@ -1,20 +1,25 @@
 ﻿using BotBinanceBL;
 using BotBinanceBL.Keys;
 using BotBinanceBL.Stocks;
+using Csv;
 using Model.Enums;
 using Strategy;
+using Strategy.Data.DataLastStrategy;
 using System;
 using System.Collections.Generic;
-using TechnicalAnalysis.Interfaces;
-using TechnicalAnalysis.Oscillators;
-using TechnicalAnalysis.Trends;
+using System.IO;
 
 namespace BotBinance
 {
     class Program
     {
+        private static string appPath => Path.GetDirectoryName(Environment.GetCommandLineArgs()[0]);
+        private static string _path => appPath + @"\Data\DataLastStrategy\DataOfIndicators.csv";
+
         static void Main(string[] args)
         {
+            #region Singals
+
             //List<IIndicator> indicators = new List<IIndicator>()
             //{
             //    new RelativeStrengthIndex(15, valueBuy: 30, valueSell: 70),
@@ -39,16 +44,13 @@ namespace BotBinance
             //client.AddStrategy(new IndicatorSignal(indicators, symbols, TimeInterval.Minutes_5));
             //client.StartStrategies();
 
+            #endregion
+
+            List<DataStrategy> dataStrategies = CSV<DataStrategy>.ReadCsv(_path);        
+
             Client client = new Client(new Binance(Settings.Key, Settings.SecretKey));
 
-            List<IIndicator> indicators = new List<IIndicator>()
-            {
-                new RelativeStrengthIndex(),
-                new TrueStrengthIndex(),
-                new LinearRegression()
-            };  
-
-            client.AddStrategy(new LastStrategy(indicators, TimeInterval.Minutes_5));
+            client.AddStrategy(new LastStrategy(dataStrategies, TimeInterval.Minutes_5));
             client.StartStrategies();
 
             Console.ReadKey();

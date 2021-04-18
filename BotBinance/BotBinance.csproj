@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BotBinanceBL\BotBinanceBL.csproj" />
+    <ProjectReference Include="..\Csv\Csv.csproj" />
     <ProjectReference Include="..\Strategy\Strategy.csproj" />
   </ItemGroup>
 
