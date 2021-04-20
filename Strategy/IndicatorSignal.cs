@@ -6,8 +6,6 @@ using Model.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using TechnicalAnalysis.Interfaces;
 
@@ -41,56 +39,28 @@ namespace Strategy
             {
                 try
                 {
-                    //await Task.WhenAll(_symbols.Select(async x =>
-                    //{
-                    //    IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(x, _timeInterval, quantity: 150);
-
-                    //    bool boolsBuy = !indicators.Select(a => a.IsBuy(candles.SkipLast(1).ToList())).Any(x => x == false);
-                    //    bool boolsSell = !indicators.Select(a => a.IsSell(candles.SkipLast(1).ToList())).Any(x => x == false);
-
-                    //    if (boolsBuy)
-                    //    {
-                    //        Console.WriteLine($"Buy Signal: symbol -- {x}, time: {DateTime.Now.ToLocalTime()}");
-                    //    }
-                    //    else if (boolsSell)
-                    //    {
-                    //        Console.WriteLine($"Sell Signal: symbol -- {x}, time: {DateTime.Now.ToLocalTime()}");
-                    //    }
-
-                    //})).ContinueWith(x => WaitTime().Wait());
-
-
-                    List<bool> lstBuys = new List<bool>();
-                    List<bool> lstSell = new List<bool>();
-
-                    foreach (string symbol in _symbols)
+                    await Task.WhenAll(_symbols.Select(async x =>
                     {
-                        IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(symbol, _timeInterval, quantity: 150);
+                        IEnumerable<Candlestick> candles = await _stock.GetCandlestickAsync(x, _timeInterval, quantity: 150);
 
-                        foreach (IIndicator indicator in indicators)
+                        bool boolsBuy = !indicators.Select(a => a.IsBuy(candles.SkipLast(1).ToList())).Any(x => x == false);
+                        bool boolsSell = !indicators.Select(a => a.IsSell(candles.SkipLast(1).ToList())).Any(x => x == false);
+
+                        if (boolsBuy)
                         {
-
-                            lstBuys.Add(indicator.IsBuy(candles.SkipLast(1).ToList()));
-                            lstSell.Add(indicator.IsSell(candles.SkipLast(1).ToList()));
+                            Console.WriteLine($"Buy Signal: symbol -- {x}, time: {DateTime.Now.ToLocalTime()}");
+                        }
+                        else if (boolsSell)
+                        {
+                            Console.WriteLine($"Sell Signal: symbol -- {x}, time: {DateTime.Now.ToLocalTime()}");
                         }
 
-                        if (!lstBuys.Any(x => x == false))
-                        {
-                            Console.WriteLine($"Buy Signal: symbol -- {symbol}, time: {DateTime.Now.ToLocalTime()}");
-                        }
+                    })).ContinueWith(x => WaitTime().ConfigureAwait(false));
 
-                        if (!lstSell.Any(x => x == false))
-                        {
-                            Console.WriteLine($"Sell Signal: symbol -- {symbol}, time: {DateTime.Now.ToLocalTime()}");
-                        }
-
-                        lstBuys = new List<bool>();
-                        lstSell = new List<bool>();
-                    }
+                    Console.Clear();
 
                 }
                 catch (Exception e) { Console.WriteLine(e.Message); }
-
             }
         }
 
