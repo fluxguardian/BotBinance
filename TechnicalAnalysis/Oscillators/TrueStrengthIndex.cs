@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TechnicalAnalysis.Interfaces;
 using Trends.TechnicalAnalysis;
 
 namespace TechnicalAnalysis.Oscillators
 {
-    public class TrueStrengthIndex : ISignal
+    public class TrueStrengthIndex : ISignal, IIndicator
     {
         private int _quantityCandles { get; set; }
         private int _periodTSI { get; set; }
